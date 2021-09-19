@@ -14,7 +14,7 @@ import WasmI64 from "runtime/unsafe/wasmi64"
  *
  * @example Validator.stake(address)
  */
-let stake = (accountId: AccountId.AccountId) => {
+export let stake = (accountId: AccountId.AccountId) => {
   let addressBytes = AccountId.toBytes(accountId)
   let ret = Int128.allocate()
   let addressPtr = WasmI64.extendI32U(
@@ -33,7 +33,7 @@ let stake = (accountId: AccountId.AccountId) => {
  *
  * @example Validator.totalStake()
  */
-let totalStake = () => {
+export let totalStake = () => {
   let ret = Int128.allocate()
   let retPtr = WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(ret), 8n))
   Native.validatorTotalStake(retPtr)

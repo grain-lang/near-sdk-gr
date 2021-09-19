@@ -3,6 +3,7 @@ import WasmI32 from "runtime/unsafe/wasmi32"
 import WasmI64 from "runtime/unsafe/wasmi64"
 import Conv from "runtime/unsafe/conv"
 import Native from "./internal/native"
+import AccountId from "./accountId"
 import Register from "./register"
 
 /**
@@ -13,7 +14,7 @@ import Register from "./register"
  *
  * @example Context.currentAccountId()
  */
-let currentAccountId = () => {
+export let currentAccountId = () => {
   Native.currentAccountId(0N)
   Register.readRegisterAccountId(0L)
 }
@@ -28,7 +29,7 @@ let currentAccountId = () => {
  *
  * @example Context.signerAccountId()
  */
-let signerAccountId = () => {
+export let signerAccountId = () => {
   Native.signerAccountId(0N)
   Register.readRegisterAccountId(0L)
 }
@@ -43,7 +44,7 @@ let signerAccountId = () => {
  *
  * @example Context.signerAccountPublicKey()
  */
-let signerAccountPublicKey = () => {
+export let signerAccountPublicKey = () => {
   Native.signerAccountPk(0N)
   Register.readRegisterBytes(0L)
 }
@@ -58,7 +59,7 @@ let signerAccountPublicKey = () => {
  *
  * @example Context.predecessorAccountId()
  */
-let predecessorAccountId = () => {
+export let predecessorAccountId = () => {
   Native.predecessorAccountId(0N)
   Register.readRegisterAccountId(0L)
 }
@@ -70,7 +71,7 @@ let predecessorAccountId = () => {
  *
  * @example Context.blockHeight()
  */
-let blockHeight = () => {
+export let blockHeight = () => {
   Conv.toInt64(Native.blockIndex())
 }
 
@@ -82,7 +83,7 @@ let blockHeight = () => {
  *
  * @example Context.blockTimestamp()
  */
-let blockTimestamp = () => {
+export let blockTimestamp = () => {
   Conv.toInt64(Native.blockTimestamp())
 }
 
@@ -93,7 +94,7 @@ let blockTimestamp = () => {
  *
  * @example Context.epochHeight()
  */
-let epochHeight = () => {
+export let epochHeight = () => {
   Conv.toInt64(Native.epochHeight())
 }
 
@@ -109,6 +110,6 @@ let epochHeight = () => {
  *
  * @example Context.storageUsage()
  */
-let storageUsage = () => {
+export let storageUsage = () => {
   Conv.toInt64(Native.storageUsage())
 }

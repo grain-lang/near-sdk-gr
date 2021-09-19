@@ -13,7 +13,7 @@ import Int128 from "./internal/int128"
  *
  * @example Economics.accountBalance()
  */
-let accountBalance = () => {
+export let accountBalance = () => {
   let ret = Int128.allocate()
   Native.accountBalance(
     WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(ret), 8n)),
@@ -28,7 +28,7 @@ let accountBalance = () => {
  *
  * @example Economics.accountLockedBalance()
  */
-let accountLockedBalance = () => {
+export let accountLockedBalance = () => {
   let ret = Int128.allocate()
   Native.accountLockedBalance(
     WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(ret), 8n)),
@@ -44,7 +44,7 @@ let accountLockedBalance = () => {
  *
  * @example Economics.accountLockedBalance()
  */
-let attachedDeposit = () => {
+export let attachedDeposit = () => {
   let ret = Int128.allocate()
   Native.attachedDeposit(
     WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(ret), 8n)),
@@ -59,7 +59,7 @@ let attachedDeposit = () => {
  *
  * @example Economics.prepaidGas()
  */
-let prepaidGas = () => {
+export let prepaidGas = () => {
   Conv.toInt64(Native.prepaidGas())
 }
 
@@ -70,6 +70,6 @@ let prepaidGas = () => {
  *
  * @example Economics.usedGas()
  */
-let usedGas = () => {
+export let usedGas = () => {
   Conv.toInt64(Native.usedGas())
 }

@@ -1,0 +1,534 @@
+/* grainc-flags --no-gc */
+
+import WasmI32 from "runtime/unsafe/wasmi32"
+import WasmI64 from "runtime/unsafe/wasmi64"
+import Native from "./internal/native"
+import AccountId from "./accountId"
+import Register from "./register"
+
+// [TODO] update types of int128/int256 versions of all functions, once support is added
+
+/**
+ * The different types of storage keys available
+ */
+export enum StorageKey {
+  /**
+   * Storage key based on String data
+   */
+  StringKey(String),
+  /**
+   * Storage key based on Bytes data
+   */
+  BytesKey(Bytes),
+  /**
+   * Storage key based on AccountIdes
+   */
+  AccountIdKey(AccountId.AccountId),
+}
+
+let keyPtr = k => {
+  match (k) {
+    StringKey(s) => WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(s), 8n)),
+    BytesKey(b) => WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(b), 8n)),
+    AccountIdKey(a) =>
+      WasmI64.extendI32U(
+        WasmI32.add(WasmI32.fromGrain(AccountId.toBytes(a)), 8n),
+      ),
+  }
+}
+
+let keyLen = k => {
+  match (k) {
+    StringKey(s) => WasmI64.load32U(WasmI32.fromGrain(s), 4n),
+    BytesKey(b) => WasmI64.load32U(WasmI32.fromGrain(b), 4n),
+    AccountIdKey(a) =>
+      WasmI64.load32U(WasmI32.fromGrain(AccountId.toBytes(a)), 4n),
+  }
+}
+
+/**
+ * Checks whether the given key exists in storage.
+ *
+ * @param key: The key to check for
+ * @returns Whether the key exists in storage
+ *
+ * @example Storage.hasKey(Storage.StringKey("foo"))
+ */
+export let hasKey = (key: StorageKey) => {
+  WasmI64.eq(Native.storageHasKey(keyLen(key), keyPtr(key)), 1N)
+}
+
+/**
+ * Looks up the given key in storage, returning any associated data
+ * interpreted as a UTF-8 string. If the lookup is successful,
+ * the contents of register 0 will be overwritten.
+ *
+ * @param key: The key to check for
+ * @returns The associated string data, if it exists
+ *
+ * @example Storage.getString(Storage.StringKey("foo"))
+ */
+export let getString = (key: StorageKey) => {
+  let res = Native.storageRead(keyLen(key), keyPtr(key), 0N)
+  if (WasmI64.eqz(res)) {
+    None
+  } else {
+    Some(Register.readRegisterString(0L))
+  }
+}
+
+/**
+ * Looks up the given key in storage, returning any associated data
+ * interpreted as a sequence of bytes. If the lookup is successful,
+ * the contents of register 0 will be overwritten.
+ *
+ * @param key: The key to check for
+ * @returns The associated data, if it exists
+ *
+ * @example Storage.getBytes(Storage.StringKey("foo"))
+ */
+export let getBytes = (key: StorageKey) => {
+  let res = Native.storageRead(keyLen(key), keyPtr(key), 0N)
+  if (WasmI64.eqz(res)) {
+    None
+  } else {
+    Some(Register.readRegisterBytes(0L))
+  }
+}
+
+/**
+ * Looks up the given key in storage, returning any associated data
+ * interpreted as a 32-bit integer. If the lookup is successful,
+ * the contents of register 0 will be overwritten.
+ *
+ * @param key: The key to check for
+ * @returns The associated int32 data, if it exists
+ *
+ * @example Storage.getInt32(Storage.StringKey("foo"))
+ */
+export let getInt32 = (key: StorageKey) => {
+  let res = Native.storageRead(keyLen(key), keyPtr(key), 0N)
+  if (WasmI64.eqz(res)) {
+    None
+  } else {
+    Some(Register.readRegisterInt32(0L))
+  }
+}
+
+/**
+ * Looks up the given key in storage, returning any associated data
+ * interpreted as a 64-bit integer. If the lookup is successful,
+ * the contents of register 0 will be overwritten.
+ *
+ * @param key: The key to check for
+ * @returns The associated int64 data, if it exists
+ *
+ * @example Storage.getInt64(Storage.StringKey("foo"))
+ */
+export let getInt64 = (key: StorageKey) => {
+  let res = Native.storageRead(keyLen(key), keyPtr(key), 0N)
+  if (WasmI64.eqz(res)) {
+    None
+  } else {
+    Some(Register.readRegisterInt64(0L))
+  }
+}
+
+/**
+ * Looks up the given key in storage, returning any associated data
+ * interpreted as a 128-bit integer. If the lookup is successful,
+ * the contents of register 0 will be overwritten.
+ *
+ * @param key: The key to check for
+ * @returns The associated int128 data, if it exists
+ *
+ * @example Storage.getInt128(Storage.StringKey("foo"))
+ */
+export let getInt128 = (key: StorageKey) => {
+  let res = Native.storageRead(keyLen(key), keyPtr(key), 0N)
+  if (WasmI64.eqz(res)) {
+    None
+  } else {
+    Some(Register.readRegisterInt128(0L))
+  }
+}
+
+/**
+ * Looks up the given key in storage, returning any associated data
+ * interpreted as a 256-bit integer. If the lookup is successful,
+ * the contents of register 0 will be overwritten.
+ *
+ * @param key: The key to check for
+ * @returns The associated int256 data, if it exists
+ *
+ * @example Storage.getInt256(Storage.StringKey("foo"))
+ */
+export let getInt256 = (key: StorageKey) => {
+  let res = Native.storageRead(keyLen(key), keyPtr(key), 0N)
+  if (WasmI64.eqz(res)) {
+    None
+  } else {
+    Some(Register.readRegisterInt256(0L))
+  }
+}
+
+let setStringLike = (key, value) => {
+  let valueLen = WasmI64.load32U(value, 4n)
+  let valuePtr = WasmI64.extendI32U(WasmI32.add(value, 8n))
+  Native.storageWrite(keyLen(key), keyPtr(key), valueLen, valuePtr, 0N)
+}
+
+/**
+ * Associates the given key in storage with the given string.
+ * If there is already a value associated with the given key,
+ * the contents of register 0 will be overwritten.
+ *
+ * @param key: The key to store
+ * @param value: The value to store
+ * @returns `true` if the operation overwrites an existing value, otherwise `false`.
+ *
+ * @example Storage.setString(Storage.StringKey("foo"), "bar")
+ */
+export let setString = (key: StorageKey, value: String) => {
+  let value = WasmI32.fromGrain(value)
+  WasmI64.eq(setStringLike(key, value), 1N)
+}
+
+/**
+ * Associates the given key in storage with the given byte data.
+ * If there is already a value associated with the given key,
+ * the contents of register 0 will be overwritten.
+ *
+ * @param key: The key to store
+ * @param value: The value to store
+ * @returns `true` if the operation overwrites an existing value, otherwise `false`.
+ *
+ * @example Storage.setBytes(Storage.StringKey("foo"), Bytes.fromString("bar"))
+ */
+export let setBytes = (key: StorageKey, value: Bytes) => {
+  let value = WasmI32.fromGrain(value)
+  WasmI64.eq(setStringLike(key, value), 1N)
+}
+
+let setFixnum = (key, value, width) => {
+  let valueLen = width
+  let valuePtr = WasmI64.extendI32U(WasmI32.add(value, 8n))
+  Native.storageWrite(keyLen(key), keyPtr(key), valueLen, valuePtr, 0N)
+}
+
+/**
+ * Associates the given key in storage with the given 32-bit integer.
+ * If there is already a value associated with the given key,
+ * the contents of register 0 will be overwritten.
+ *
+ * @param key: The key to store
+ * @param value: The value to store
+ * @returns `true` if the operation overwrites an existing value, otherwise `false`.
+ *
+ * @example Storage.setInt32(Storage.StringKey("foo"), 42l)
+ */
+export let setInt32 = (key: StorageKey, value: Int32) => {
+  let value = WasmI32.fromGrain(value)
+  WasmI64.eq(setFixnum(key, value, 4N), 1N)
+}
+
+/**
+ * Associates the given key in storage with the given 64-bit integer.
+ * If there is already a value associated with the given key,
+ * the contents of register 0 will be overwritten.
+ *
+ * @param key: The key to store
+ * @param value: The value to store
+ * @returns `true` if the operation overwrites an existing value, otherwise `false`.
+ *
+ * @example Storage.setInt64(Storage.StringKey("foo"), 42L)
+ */
+export let setInt64 = (key: StorageKey, value: Int64) => {
+  let value = WasmI32.fromGrain(value)
+  WasmI64.eq(setFixnum(key, value, 4N), 8N)
+}
+
+/**
+ * Associates the given key in storage with the given 128-bit integer.
+ * If there is already a value associated with the given key,
+ * the contents of register 0 will be overwritten.
+ *
+ * @param key: The key to store
+ * @param value: The value to store
+ * @returns `true` if the operation overwrites an existing value, otherwise `false`.
+ *
+ * @example Storage.setInt128(Storage.StringKey("foo"), Int128.fromInt64(5L))
+ */
+export let setInt128 = (key: StorageKey, value: Bytes) => {
+  setBytes(key, value)
+}
+
+/**
+ * Associates the given key in storage with the given 256-bit integer.
+ * If there is already a value associated with the given key,
+ * the contents of register 0 will be overwritten.
+ *
+ * @param key: The key to store
+ * @param value: The value to store
+ * @returns `true` if the operation overwrites an existing value, otherwise `false`.
+ *
+ * @example Storage.setInt256(Storage.StringKey("foo"), Int256.fromInt64(5L))
+ */
+export let setInt256 = (key: StorageKey, value: Bytes) => {
+  setBytes(key, value)
+}
+
+/**
+ * Associates the given key in storage with the given string,
+ * returning any existing value (interpreted as a string).
+ * If there is already a value associated with the given key,
+ * the contents of register 0 will be overwritten.
+ *
+ * @param key: The key to store
+ * @param value: The value to store
+ * @returns The existing string data associated with `key`, if any
+ *
+ * @example Storage.swapString(Storage.StringKey("foo"), "bar")
+ */
+export let swapString = (key: StorageKey, value: String) => {
+  if (setString(key, value)) {
+    Some(Register.readRegisterString(0L))
+  } else {
+    None
+  }
+}
+
+/**
+ * Associates the given key in storage with the given byte data,
+ * returning any existing value (interpreted as a byte sequence).
+ * If there is already a value associated with the given key,
+ * the contents of register 0 will be overwritten.
+ *
+ * @param key: The key to store
+ * @param value: The value to store
+ * @returns The existing byte data associated with `key`, if any
+ *
+ * @example Storage.swapBytes(Storage.StringKey("foo"), Bytes.fromString("bar"))
+ */
+export let swapBytes = (key: StorageKey, value: Bytes) => {
+  if (setBytes(key, value)) {
+    Some(Register.readRegisterBytes(0L))
+  } else {
+    None
+  }
+}
+
+/**
+ * Associates the given key in storage with the given 32-bit integer,
+ * returning any existing value (interpreted as a 32-bit integer).
+ * If there is already a value associated with the given key,
+ * the contents of register 0 will be overwritten.
+ *
+ * @param key: The key to store
+ * @param value: The value to store
+ * @returns The existing int32 data associated with `key`, if any
+ *
+ * @example Storage.swapInt32(Storage.StringKey("foo"), 42l)
+ */
+export let swapInt32 = (key: StorageKey, value: Int32) => {
+  if (setInt32(key, value)) {
+    Some(Register.readRegisterInt32(0L))
+  } else {
+    None
+  }
+}
+
+/**
+ * Associates the given key in storage with the given 64-bit integer,
+ * returning any existing value (interpreted as a 64-bit integer).
+ * If there is already a value associated with the given key,
+ * the contents of register 0 will be overwritten.
+ *
+ * @param key: The key to store
+ * @param value: The value to store
+ * @returns The existing string data associated with `key`, if any
+ *
+ * @example Storage.setInt64(Storage.StringKey("foo"), 42L)
+ */
+export let swapInt64 = (key: StorageKey, value: Int64) => {
+  if (setInt64(key, value)) {
+    Some(Register.readRegisterInt64(0L))
+  } else {
+    None
+  }
+}
+
+/**
+ * Associates the given key in storage with the given 128-bit integer,
+ * returning any existing value (interpreted as a 128-bit integer).
+ * If there is already a value associated with the given key,
+ * the contents of register 0 will be overwritten.
+ *
+ * @param key: The key to store
+ * @param value: The value to store
+ * @returns The existing string data associated with `key`, if any
+ *
+ * @example Storage.setInt128(Storage.StringKey("foo"), Int128.fromInt64(5L))
+ */
+export let swapInt128 = (key: StorageKey, value: Bytes) => {
+  if (setInt128(key, value)) {
+    Some(Register.readRegisterInt128(0L))
+  } else {
+    None
+  }
+}
+
+/**
+ * Associates the given key in storage with the given 256-bit integer,
+ * returning any existing value (interpreted as a 256-bit integer).
+ * If there is already a value associated with the given key,
+ * the contents of register 0 will be overwritten.
+ *
+ * @param key: The key to store
+ * @param value: The value to store
+ * @returns The existing string data associated with `key`, if any
+ *
+ * @example Storage.setInt256(Storage.StringKey("foo"), Int256.fromInt64(5L))
+ */
+export let swapInt256 = (key: StorageKey, value: Bytes) => {
+  if (setInt256(key, value)) {
+    Some(Register.readRegisterInt256(0L))
+  } else {
+    None
+  }
+}
+
+/**
+ * Removes any storage entry associated with the given key,
+ * returning any existing value, interpreted as a string.
+ * If this operation removes an entry, the contents of
+ * register 0 will be overwritten.
+ *
+ * @param key: The key to remove
+ * @returns The string value which was removed from storage
+ *
+ * @example Storage.removeString(Storage.StringKey("foo"))
+ */
+export let removeString = (key: StorageKey) => {
+  let res = Native.storageRemove(keyLen(key), keyPtr(key), 0N)
+  if (WasmI64.eqz(res)) {
+    None
+  } else {
+    Some(Register.readRegisterString(0L))
+  }
+}
+
+/**
+ * Removes any storage entry associated with the given key,
+ * returning any existing value, interpreted as a byte sequence.
+ * If this operation removes an entry, the contents of
+ * register 0 will be overwritten.
+ *
+ * @param key: The key to remove
+ * @returns The bytes value which was removed from storage
+ *
+ * @example Storage.removeBytes(Storage.StringKey("foo"))
+ */
+export let removeBytes = (key: StorageKey) => {
+  let res = Native.storageRemove(keyLen(key), keyPtr(key), 0N)
+  if (WasmI64.eqz(res)) {
+    None
+  } else {
+    Some(Register.readRegisterBytes(0L))
+  }
+}
+
+/**
+ * Removes any storage entry associated with the given key,
+ * returning any existing value, interpreted as a 32-bit integer.
+ * If this operation removes an entry, the contents of
+ * register 0 will be overwritten.
+ *
+ * @param key: The key to remove
+ * @returns The int32 value which was removed from storage
+ *
+ * @example Storage.removeInt32(Storage.StringKey("foo"))
+ */
+export let removeInt32 = (key: StorageKey) => {
+  let res = Native.storageRemove(keyLen(key), keyPtr(key), 0N)
+  if (WasmI64.eqz(res)) {
+    None
+  } else {
+    Some(Register.readRegisterInt32(0L))
+  }
+}
+
+/**
+ * Removes any storage entry associated with the given key,
+ * returning any existing value, interpreted as a 64-bit integer.
+ * If this operation removes an entry, the contents of
+ * register 0 will be overwritten.
+ *
+ * @param key: The key to remove
+ * @returns The string value which was removed from storage
+ *
+ * @example Storage.removeInt64(Storage.StringKey("foo"))
+ */
+export let removeInt64 = (key: StorageKey) => {
+  let res = Native.storageRemove(keyLen(key), keyPtr(key), 0N)
+  if (WasmI64.eqz(res)) {
+    None
+  } else {
+    Some(Register.readRegisterInt64(0L))
+  }
+}
+
+/**
+ * Removes any storage entry associated with the given key,
+ * returning any existing value, interpreted as a 128-bit integer.
+ * If this operation removes an entry, the contents of
+ * register 0 will be overwritten.
+ *
+ * @param key: The key to remove
+ * @returns The string value which was removed from storage
+ *
+ * @example Storage.removeInt128(Storage.StringKey("foo"))
+ */
+export let removeInt128 = (key: StorageKey) => {
+  let res = Native.storageRemove(keyLen(key), keyPtr(key), 0N)
+  if (WasmI64.eqz(res)) {
+    None
+  } else {
+    Some(Register.readRegisterInt128(0L))
+  }
+}
+
+/**
+ * Removes any storage entry associated with the given key,
+ * returning any existing value, interpreted as a 256-bit integer.
+ * If this operation removes an entry, the contents of
+ * register 0 will be overwritten.
+ *
+ * @param key: The key to remove
+ * @returns The string value which was removed from storage
+ *
+ * @example Storage.removeInt256(Storage.StringKey("foo"))
+ */
+export let removeInt256 = (key: StorageKey) => {
+  let res = Native.storageRemove(keyLen(key), keyPtr(key), 0N)
+  if (WasmI64.eqz(res)) {
+    None
+  } else {
+    Some(Register.readRegisterInt256(0L))
+  }
+}
+
+/**
+ * Removes any storage entry associated with the given key.
+ * If this operation removes an entry, the contents of
+ * register 0 will be overwritten.
+ *
+ * @param key: The key to remove
+ * @returns Whether this operation removed data from storage
+ *
+ * @example Storage.remove(Storage.StringKey("foo"))
+ */
+export let remove = (key: StorageKey) => {
+  let res = Native.storageRemove(keyLen(key), keyPtr(key), 0N)
+  WasmI64.eq(res, 1N)
+}

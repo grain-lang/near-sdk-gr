@@ -1,0 +1,59 @@
+/* grainc-flags --no-gc */
+import WasmI32 from "runtime/unsafe/wasmi32"
+import WasmI64 from "runtime/unsafe/wasmi64"
+import Native from "./internal/native"
+
+/**
+ * Sets the given byte sequence as the return value of the contract.
+ *
+ * @param bytes: The bytes to return
+ * @example Utils.valueReturnString("something important")
+ */
+export let valueReturnBytes = (bytes: Bytes) => {
+  let ptr = WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(bytes), 8n))
+  let len = WasmI64.load32U(WasmI32.fromGrain(bytes), 4n)
+  Native.valueReturn(len, ptr)
+}
+
+/**
+ * Sets the given string as the return value of the contract.
+ *
+ * @param str: The string to return
+ * @example Utils.valueReturnString("something important")
+ */
+export let valueReturnString = (str: String) => {
+  let ptr = WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(str), 8n))
+  let len = WasmI64.load32U(WasmI32.fromGrain(str), 4n)
+  Native.valueReturn(len, ptr)
+}
+
+/**
+ * Terminates the execution of the program with panic `GuestPanic("explicit guest panic")`
+ *
+ * @example Utils.panic()
+ */
+export let panic = Native.panic
+
+/**
+ * Terminates the execution of the program with panic `GuestPanic(str)`
+ *
+ * @param str: The string to use in the `GuestPanic`
+ * @example Utils.panicString("Oh no!")
+ */
+export let panicString = (str: String) => {
+  let ptr = WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(str), 8n))
+  let len = WasmI64.load32U(WasmI32.fromGrain(str), 4n)
+  Native.panicUtf8(len, ptr)
+}
+
+/**
+ * Logs the given string
+ *
+ * @param str: The string to log
+ * @example Utils.log("Something happened")
+ */
+export let log = (str: String) => {
+  let ptr = WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(str), 8n))
+  let len = WasmI64.load32U(WasmI32.fromGrain(str), 4n)
+  Native.logUtf8(len, ptr)
+}

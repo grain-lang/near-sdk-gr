@@ -1,0 +1,634 @@
+/* grainc-flags --no-gc */
+import WasmI32 from "runtime/unsafe/wasmi32"
+import WasmI64 from "runtime/unsafe/wasmi64"
+import Conv from "runtime/unsafe/conv"
+import Native from "./internal/native"
+import Int128 from "./internal/int128"
+import AccountId from "./accountId"
+import Register from "./register"
+import Array from "array"
+import String from "string"
+import Buffer from "buffer"
+import Int64 from "int64"
+
+record Promise { index: Int64 }
+
+// NOTE:
+// arguments is a JSON-formatted string: (https://github.com/near/nearcore/blob/a20c12ec02d7f22550139da38838efd1fba75ede/runtime/near-vm-logic/src/logic.rs#L578)
+
+/**
+ * Creates a promise that will execute a method on account with given arguments and attaches the given amount.
+ *
+ * @param accountId: The account to call the function on
+ * @param methodName: The function to call
+ * @param arguments: The arguments to the function (a JSON-formatteds tring)
+ * @param amount: The amount to attach to the function call (a 128-bit integer)
+ * @param gas: The amount of gas to attach to the function call
+ * @return The new promise
+ */
+export let create =
+  (
+    accountId: AccountId.AccountId,
+    methodName: String,
+    arguments: String,
+    amount: Bytes,
+    gas: Int64,
+  ) => {
+  let accountBytes = AccountId.toBytes(accountId)
+  let acctPtr = WasmI64.extendI32U(
+    WasmI32.add(WasmI32.fromGrain(accountBytes), 8n),
+  )
+  let acctLen = WasmI64.load32U(WasmI32.fromGrain(accountBytes), 4n)
+  let methodPtr = WasmI64.extendI32U(
+    WasmI32.add(WasmI32.fromGrain(methodName), 8n),
+  )
+  let methodLen = WasmI64.load32U(WasmI32.fromGrain(methodName), 4n)
+  let argumentsPtr = WasmI64.extendI32U(
+    WasmI32.add(WasmI32.fromGrain(arguments), 8n),
+  )
+  let argumentsLen = WasmI64.load32U(WasmI32.fromGrain(arguments), 4n)
+  let amountPtr = WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(amount), 8n))
+  let gasW = Conv.fromInt64(gas)
+  let promiseIdxW = Native.promiseCreate(
+    acctLen,
+    acctPtr,
+    methodLen,
+    methodPtr,
+    argumentsLen,
+    argumentsPtr,
+    amountPtr,
+    gasW,
+  )
+  { index: Conv.toInt64(promiseIdxW), }
+}
+
+/**
+ * Creates a new promise towards given `account_id` without any actions attached, that is
+ * executed after the given promise is complete.
+ *
+ * @param promise: The promise to append the action to
+ * @param accountId: The account to call the function on
+ * @param methodName: The function to call
+ * @param arguments: The arguments to the function (a JSON-formatteds tring)
+ * @param amount: The amount to attach to the function call (a 128-bit integer)
+ * @param gas: The amount of gas to attach to the function call
+ * @return The new promise
+ */
+export let then =
+  (
+    promise: Promise,
+    accountId: AccountId.AccountId,
+    methodName: String,
+    arguments: Bytes,
+    amount: Bytes,
+    gas: Int64,
+  ) => {
+  let { index } = promise
+  let accountBytes = AccountId.toBytes(accountId)
+  let acctPtr = WasmI64.extendI32U(
+    WasmI32.add(WasmI32.fromGrain(accountBytes), 8n),
+  )
+  let acctLen = WasmI64.load32U(WasmI32.fromGrain(accountBytes), 4n)
+  let methodPtr = WasmI64.extendI32U(
+    WasmI32.add(WasmI32.fromGrain(methodName), 8n),
+  )
+  let methodLen = WasmI64.load32U(WasmI32.fromGrain(methodName), 4n)
+  let argumentsPtr = WasmI64.extendI32U(
+    WasmI32.add(WasmI32.fromGrain(arguments), 8n),
+  )
+  let argumentsLen = WasmI64.load32U(WasmI32.fromGrain(arguments), 4n)
+  let amountPtr = WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(amount), 8n))
+  let gasW = Conv.fromInt64(gas)
+  let promiseIdxW = Native.promiseThen(
+    Conv.fromInt64(index),
+    acctLen,
+    acctPtr,
+    methodLen,
+    methodPtr,
+    argumentsLen,
+    argumentsPtr,
+    amountPtr,
+    gasW,
+  )
+  { index: Conv.toInt64(promiseIdxW), }
+}
+
+let preparePromises = (promises: Array<Promise>) => {
+  let length = Array.length(promises)
+  let buf = Buffer.make(length * 8)
+  // approximation
+  for (let mut i = 0; i < length; i += 1) {
+    let { index } = promises[i]
+    Buffer.addInt64(index, buf)
+  }
+  Buffer.toBytes(buf)
+}
+
+/**
+ * Creates a new promise which completes when time all promises passed as arguments complete.
+ *
+ * @param promises: The array of promises that need to be waited on jointly.
+ * @return The new promise
+ */
+export let and = (promises: Array<Promise>) => {
+  let prepared = preparePromises(promises)
+  let promisesPtr = WasmI64.extendI32U(
+    WasmI32.add(WasmI32.fromGrain(promises), 8n),
+  )
+  let promisesLen = WasmI64.load32U(WasmI32.fromGrain(promises), 4n)
+  let promiseIdxW = Native.promiseAnd(promisesPtr, promisesLen)
+  { index: Conv.toInt64(promiseIdxW), }
+}
+
+/**
+ * @section Batched Actions
+ *
+ * For more information, see https://github.com/nearprotocol/NEPs/pull/8/files#diff-15b6752ec7d78e7b85b8c7de4a19cbd4R48
+ */
+
+/**
+ * Appends a `CreateAccount` action to the batch of actions for the given promise.
+ *
+ * - Creates an account with `id` == `receiverId`
+ * - Sets Account `storage_usage` to `account_cost` (genesis config)
+ *
+ * https://nomicon.io/RuntimeSpec/Actions.html#createaccountaction
+ *
+ * @param promise: The promise to append the action to
+ */
+export let batchActionCreateAccount = promise => {
+  let { index } = promise
+  Native.promiseBatchActionCreateAccount(Conv.fromInt64(index))
+}
+
+/**
+ * Appends a `DeployContract` action to the batch of actions for the given promise.
+ *
+ * Sets the contract code for the account.
+ *
+ * https://nomicon.io/RuntimeSpec/Actions.html#deploycontractaction
+ *
+ * @param promise: The promise to append the action to
+ * @param code: The contract to deploy
+ */
+export let batchActionDeployContract = (promise, code: Bytes) => {
+  let { index } = promise
+  let codePtr = WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(code), 8n))
+  let codeLen = WasmI64.load32U(WasmI32.fromGrain(code), 4n)
+  Native.promiseBatchActionDeployContract(
+    Conv.fromInt64(index),
+    codeLen,
+    codePtr,
+  )
+}
+
+/**
+ * Appends a `FunctionCall` action to the batch of actions for the given promise.
+ *
+ * https://nomicon.io/RuntimeSpec/Actions.html#functioncallaction
+ *
+ * @param promise: The promise to append the action to
+ * @param methodName: The name of the method to call
+ * @param arguments: The arguments for the function call
+ * @param amount: The amount to attach to the function call (a 128-bit integer)
+ * @param gas: The amount of gas to attach to the function call
+ */
+export let batchActionFunctionCall =
+  (
+    promise,
+    methodName: String,
+    arguments: Bytes,
+    amount: Bytes,
+    gas: Int64,
+  ) => {
+  let { index } = promise
+  let methodPtr = WasmI64.extendI32U(
+    WasmI32.add(WasmI32.fromGrain(methodName), 8n),
+  )
+  let methodLen = WasmI64.load32U(WasmI32.fromGrain(methodName), 4n)
+  let argumentsPtr = WasmI64.extendI32U(
+    WasmI32.add(WasmI32.fromGrain(arguments), 8n),
+  )
+  let argumentsLen = WasmI64.load32U(WasmI32.fromGrain(arguments), 4n)
+  let amountPtr = WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(amount), 8n))
+  let gasW = Conv.fromInt64(gas)
+  Native.promiseBatchActionFunctionCall(
+    Conv.fromInt64(index),
+    methodLen,
+    methodPtr,
+    argumentsLen,
+    argumentsPtr,
+    amountPtr,
+    gasW,
+  )
+}
+
+/**
+ * Appends a `Transfer` action to the batch of actions for the given promise.
+ *
+ * This will transfer the amount specified in `amount` from `predecessorId` to a `receiverId` account.
+ *
+ * https://nomicon.io/RuntimeSpec/Actions.html#transferaction
+ *
+ * @param promise: The promise to append the action to
+ * @param amount: The amount to transfer (a 128-bit integer)
+ */
+export let batchActionTransfer = (promise, amount: Bytes) => {
+  let { index } = promise
+  let amountPtr = WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(amount), 8n))
+  Native.promiseBatchActionTransfer(Conv.fromInt64(index), amountPtr)
+}
+
+/**
+ * Appends a `Stake` action to the batch of actions for the given promise.
+ *
+ * A validator proposal that contains the staking public key and the staking
+ * amount will be generated and will be included in the next block.
+ *
+ * https://nomicon.io/RuntimeSpec/Actions.html#stakeaction
+ *
+ * @param promise: The promise to append the action to
+ * @param amount: The amount of tokens to stake (a 128-bit integer)
+ * @param publicKey: A public key of the validator node
+ */
+export let batchActionStake = (promise, amount: Bytes, publicKey: Bytes) => {
+  let { index } = promise
+  let amountPtr = WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(amount), 8n))
+  let publicKeyPtr = WasmI64.extendI32U(
+    WasmI32.add(WasmI32.fromGrain(publicKey), 8n),
+  )
+  let publicKeyLen = WasmI64.load32U(WasmI32.fromGrain(publicKey), 4n)
+  Native.promiseBatchActionStake(
+    Conv.fromInt64(index),
+    amountPtr,
+    publicKeyLen,
+    publicKeyPtr,
+  )
+}
+
+/**
+ * Permission structure which allows FunctionCalls to a specified receiverId.
+ *
+ * Source: https://nomicon.io/DataStructures/AccessKey.html#accesskeypermissionfunctioncall
+ *
+ * This record has the following fields:
+ * - `allowance`: The balance limit (a 128-bit integer) to use by this access key to pay for function call gas and
+ *   transaction fees. When this access key is used, both account balance and the allowance is
+ *   decreased by the same value. `None` means unlimited allowance.
+ *   NOTE: To change or increase the allowance, the old access key needs to be deleted and a new
+ *   access key should be created.
+ * - `receiverId`: The access key only allows transactions with the given receiver's account id.
+ * - A list of method names that can be used. The access key only allows transactions with the
+ *   function call of one of the given method names. Empty list means any method name can be used.
+ */
+export record FunctionCallPermission {
+  allowance: Option<Bytes>,
+  receiverId: AccountId.AccountId,
+  methodNames: Array<String>, // [TODO] should this be List<String> instead?
+}
+
+/**
+ * Types of permissions which can be associated with an AccessKey.
+ *
+ * Source: https://nomicon.io/DataStructures/AccessKey.html#access-keys
+ */
+export enum AccessKeyPermission {
+  FullAccess,
+  FunctionCallAccess(FunctionCallPermission),
+}
+
+/**
+ * An access key which provides an access for a particular account.
+ *
+ * Source: https://nomicon.io/DataStructures/AccessKey.html#access-keys
+ *
+ * This record has the following fields:
+ * - `nonce`: The nonce for this access key. NOTE: In some cases the access key needs to be recreated. If the new access key reuses the
+ *   same public key, the nonce of the new access key should be equal to the nonce of the old
+ *   access key. It's required to avoid replaying old transactions again.
+ * - `permission`: Defines the permissions for this access key
+ */
+export record AccessKey { nonce: Bytes, permission: AccessKeyPermission }
+
+// Comma-separated; reverse-engineered from https://github.com/near/nearcore/blob/5d12069ca305cc781c77d63e3c932e1c11f06ac4/runtime/near-vm-logic/src/utils.rs#L8
+
+let prepareMethodNames = (methodNames: Array<String>) => {
+  let length = Array.length(methodNames)
+  let buf = Buffer.make(length * 6)
+  // approximation
+  for (let mut i = 0; i < length; i += 1) {
+    if (i > 0) {
+      Buffer.addString(",", buf)
+    }
+    Buffer.addString(methodNames[i], buf)
+  }
+  buf
+}
+
+/**
+ * Appends a `AddKey` action to the batch of actions for the given promise.
+ *
+ * Adds a new `AccessKey` to the receiver's account and associates it with a `publicKey` provided.
+ *
+ * https://nomicon.io/RuntimeSpec/Actions.html#addkeyaction
+ *
+ * @param promise: The promise to append the action to
+ * @param publicKey: A public key to associate the access key with
+ * @param accessKey: The access key to add
+ */
+export let batchActionAddKey =
+  (
+    promise,
+    publicKey: Bytes,
+    accessKey: AccessKey,
+  ) => {
+  let { index } = promise
+  let { nonce, permission } = accessKey
+  let noncePtr = WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(nonce), 8n))
+  let publicKeyPtr = WasmI64.extendI32U(
+    WasmI32.add(WasmI32.fromGrain(publicKey), 8n),
+  )
+  let publicKeyLen = WasmI64.load32U(WasmI32.fromGrain(publicKey), 4n)
+  match (permission) {
+    FullAccess => {
+      Native.promiseBatchActionAddKeyWithFullAccess(
+        Conv.fromInt64(index),
+        publicKeyLen,
+        publicKeyPtr,
+        noncePtr,
+      )
+    },
+    FunctionCallAccess({ allowance, receiverId, methodNames }) => {
+      let allowance = match (allowance) {
+        Some(a) => a,
+        None => Int128.allocate(),
+      }
+      let allowancePtr = WasmI64.extendI32U(
+        WasmI32.add(WasmI32.fromGrain(allowance), 8n),
+      )
+      let receiverIdPtr = WasmI64.extendI32U(
+        WasmI32.add(WasmI32.fromGrain(AccountId.toBytes(receiverId)), 8n),
+      )
+      let receiverIdLen = WasmI64.load32U(
+        WasmI32.fromGrain(AccountId.toBytes(receiverId)),
+        4n,
+      )
+      let preppedMethodNames = prepareMethodNames(methodNames)
+      let methodNamesLen = Conv.fromInt64(
+        Int64.fromNumber(Buffer.length(preppedMethodNames)),
+      )
+      let methodNamesPtr = WasmI64.extendI32U(
+        WasmI32.add(WasmI32.fromGrain(Buffer.toBytes(preppedMethodNames)), 8n),
+      )
+      Native.promiseBatchActionAddKeyWithFunctionCall(
+        Conv.fromInt64(index),
+        publicKeyLen,
+        publicKeyPtr,
+        noncePtr,
+        allowancePtr,
+        receiverIdLen,
+        receiverIdPtr,
+        methodNamesLen,
+        methodNamesPtr,
+      )
+    },
+  }
+}
+
+/**
+ * Appends a `DeleteKey` action to the batch of actions for the given promise.
+ *
+ * Deletes the `AccessKey` from the receiver's account associed with the `publicKey` provided.
+ *
+ * https://nomicon.io/RuntimeSpec/Actions.html#deletekeyaction
+ *
+ * @param promise: The promise to append the action to
+ * @param publicKey: A public key to delete the associated access key from
+ */
+export let batchActionDeleteKey = (promise, publicKey: Bytes) => {
+  let { index } = promise
+  let publicKeyPtr = WasmI64.extendI32U(
+    WasmI32.add(WasmI32.fromGrain(publicKey), 8n),
+  )
+  let publicKeyLen = WasmI64.load32U(WasmI32.fromGrain(publicKey), 4n)
+  Native.promiseBatchActionDeleteKey(
+    Conv.fromInt64(index),
+    publicKeyLen,
+    publicKeyPtr,
+  )
+}
+
+/**
+ * Appends a `DeleteAccount` action to the batch of actions for the given promise.
+ *
+ * The account, as well as all the data stored under the account, is deleted
+ * and the tokens are transferred to beneficiaryId.
+ *
+ * https://nomicon.io/RuntimeSpec/Actions.html#deleteaccountaction
+ *
+ * @param promise: The promise to append the action to
+ * @param publicKey: The account ID to transfer the remaining balance to
+ */
+export let batchActionDeleteAccount =
+  (
+    promise,
+    beneficiaryId: AccountId.AccountId,
+  ) => {
+  let { index } = promise
+  let benificiaryPtr = WasmI64.extendI32U(
+    WasmI32.add(WasmI32.fromGrain(AccountId.toBytes(beneficiaryId)), 8n),
+  )
+  let benificiaryLen = WasmI64.load32U(
+    WasmI32.fromGrain(AccountId.toBytes(beneficiaryId)),
+    4n,
+  )
+  Native.promiseBatchActionDeleteAccount(
+    Conv.fromInt64(index),
+    benificiaryLen,
+    benificiaryPtr,
+  )
+}
+
+/**
+ * @section Promise Results
+ */
+
+/**
+ * If the current execution is invoked by a callback we can access the execution results of the
+ * promises that caused the callback. This function returns the number of complete and
+ * incomplete callbacks.
+ *
+ * Note, there will only be incomplete callbacks once there is an `or` combinator.
+ *
+ * - If there is only one callback returns `1`;
+ * - If there are multiple callbacks (e.g. created through `promise_and`) returns their number;
+ * - If the function was called not through the callback returns `0`.
+ */
+export let resultsCount = () => {
+  Conv.toInt64(Native.promiseResultsCount())
+}
+
+/**
+ * If the current function is invoked by a callback we can access the execution results of the
+ * promises that caused the callback. This function returns the result in blob format and
+ * places it into register 0.
+ *
+ * - If promise result is complete and successful copies its blob into register 0;
+ * - If promise result is complete and failed or incomplete keeps register 0 unused;
+ *
+ * @param resultIdx: The callback whose result to load
+ * @returns `None` if the promise has not completed, or `Some(flag)` if it has (where `flag` is `true` if the promise succeeded)
+ */
+export let checkResult = (resultIdx: Int64) => {
+  let res = Native.promiseResult(Conv.fromInt64(resultIdx), 0N)
+  if (WasmI64.eqz(res)) {
+    None
+  } else if (WasmI64.eq(res, 1N)) {
+    Some(true)
+  } else {
+    Some(false)
+  }
+}
+
+/**
+ * If the current function is invoked by a callback we can access the execution results of the
+ * promises that caused the callback. This function returns the result as a byte sequence.
+ * If the promise result is complete and successful, register 0 will be overwritten.
+ *
+ * - If promise result is complete and successful copies its blob into the register;
+ * - If promise result is complete and failed or incomplete keeps register unused;
+ *
+ * @param resultIdx: The callback whose result to load
+ * @returns `None` if the promise has not completed, or `Some(Ok(result))` if it has successfully, or `Some(Err(msg))` if it has failed
+ */
+export let getResultBytes = (resultIdx: Int64) => {
+  match (checkResult(resultIdx)) {
+    Some(true) => Some(Ok(Register.readRegisterBytes(0L))),
+    Some(_) => Some(Err("Promise failed")),
+    None => None,
+  }
+}
+
+/**
+ * If the current function is invoked by a callback we can access the execution results of the
+ * promises that caused the callback. This function returns the result as a string.
+ * If the promise result is complete and successful, register 0 will be overwritten.
+ *
+ * - If promise result is complete and successful copies its blob into the register;
+ * - If promise result is complete and failed or incomplete keeps register unused;
+ *
+ * @param resultIdx: The callback whose result to load
+ * @returns `None` if the promise has not completed, or `Some(Ok(result))` if it has successfully, or `Some(Err(msg))` if it has failed
+ */
+export let getResultString = (resultIdx: Int64) => {
+  match (checkResult(resultIdx)) {
+    Some(true) => Some(Ok(Register.readRegisterString(0L))),
+    Some(_) => Some(Err("Promise failed")),
+    None => None,
+  }
+}
+
+/**
+ * If the current function is invoked by a callback we can access the execution results of the
+ * promises that caused the callback. This function returns the result as a 32-bit integer.
+ * If the promise result is complete and successful, register 0 will be overwritten.
+ *
+ * - If promise result is complete and successful copies its blob into the register;
+ * - If promise result is complete and failed or incomplete keeps register unused;
+ *
+ * @param resultIdx: The callback whose result to load
+ * @returns `None` if the promise has not completed, or `Some(Ok(result))` if it has successfully, or `Some(Err(msg))` if it has failed
+ */
+export let getResultInt32 = (resultIdx: Int64) => {
+  match (checkResult(resultIdx)) {
+    Some(true) => Some(Ok(Register.readRegisterInt32(0L))),
+    Some(_) => Some(Err("Promise failed")),
+    None => None,
+  }
+}
+
+/**
+ * If the current function is invoked by a callback we can access the execution results of the
+ * promises that caused the callback. This function returns the result as a 64-bit integer.
+ * If the promise result is complete and successful, register 0 will be overwritten.
+ *
+ * - If promise result is complete and successful copies its blob into the register;
+ * - If promise result is complete and failed or incomplete keeps register unused;
+ *
+ * @param resultIdx: The callback whose result to load
+ * @returns `None` if the promise has not completed, or `Some(Ok(result))` if it has successfully, or `Some(Err(msg))` if it has failed
+ */
+export let getResultInt64 = (resultIdx: Int64) => {
+  match (checkResult(resultIdx)) {
+    Some(true) => Some(Ok(Register.readRegisterInt64(0L))),
+    Some(_) => Some(Err("Promise failed")),
+    None => None,
+  }
+}
+
+/**
+ * If the current function is invoked by a callback we can access the execution results of the
+ * promises that caused the callback. This function returns the result as a 128-bit integer.
+ * If the promise result is complete and successful, register 0 will be overwritten.
+ *
+ * - If promise result is complete and successful copies its blob into the register;
+ * - If promise result is complete and failed or incomplete keeps register unused;
+ *
+ * @param resultIdx: The callback whose result to load
+ * @returns `None` if the promise has not completed, or `Some(Ok(result))` if it has successfully, or `Some(Err(msg))` if it has failed
+ */
+export let getResultInt128 = (resultIdx: Int64) => {
+  match (checkResult(resultIdx)) {
+    Some(true) => Some(Ok(Register.readRegisterInt128(0L))),
+    Some(_) => Some(Err("Promise failed")),
+    None => None,
+  }
+}
+
+/**
+ * If the current function is invoked by a callback we can access the execution results of the
+ * promises that caused the callback. This function returns the result as a 256-bit integer.
+ * If the promise result is complete and successful, register 0 will be overwritten.
+ *
+ * - If promise result is complete and successful copies its blob into the register;
+ * - If promise result is complete and failed or incomplete keeps register unused;
+ *
+ * @param resultIdx: The callback whose result to load
+ * @returns `None` if the promise has not completed, or `Some(Ok(result))` if it has successfully, or `Some(Err(msg))` if it has failed
+ */
+export let getResultInt256 = (resultIdx: Int64) => {
+  match (checkResult(resultIdx)) {
+    Some(true) => Some(Ok(Register.readRegisterInt256(0L))),
+    Some(_) => Some(Err("Promise failed")),
+    None => None,
+  }
+}
+
+/**
+ * If the current function is invoked by a callback we can access the execution results of the
+ * promises that caused the callback. This function returns the result as an account ID.
+ * If the promise result is complete and successful, register 0 will be overwritten.
+ *
+ * - If promise result is complete and successful copies its blob into the register;
+ * - If promise result is complete and failed or incomplete keeps register unused;
+ *
+ * @param resultIdx: The callback whose result to load
+ * @returns `None` if the promise has not completed, or `Some(Ok(result))` if it has successfully, or `Some(Err(msg))` if it has failed
+ */
+export let getResultAccountId = (resultIdx: Int64) => {
+  match (checkResult(resultIdx)) {
+    Some(true) => Some(Ok(Register.readRegisterAccountId(0L))),
+    Some(_) => Some(Err("Promise failed")),
+    None => None,
+  }
+}
+
+/**
+ * When the given promise finishes executing its result is considered to be the result of the current function.
+ *
+ * @param promise: The promise whose result to return
+ */
+let promiseReturn = promise => {
+  let { index } = promise
+  Native.promiseReturn(Conv.fromInt64(index))
+}

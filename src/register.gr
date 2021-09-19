@@ -1,0 +1,153 @@
+/* grainc-flags --no-gc */
+
+import Native from "./internal/native"
+import Int128 from "./internal/int128"
+import Int256 from "./internal/int256"
+import AccountId from "./accountId"
+import WasmI32 from "runtime/unsafe/wasmi32"
+import WasmI64 from "runtime/unsafe/wasmi64"
+import Conv from "runtime/unsafe/conv"
+import {
+  allocateString,
+  allocateBytes,
+  allocateInt32,
+  allocateInt64
+} from "runtime/dataStructures"
+
+// For the moment, the `native.gr` API is needed to do host-to-host blob passing.
+// https://nomicon.io/RuntimeSpec/Components/BindingsSpec/RegistersAPI.html#host--host-blob-passing
+
+/**
+ * Reads the contents of the given register, interpreting
+ * the data as a string.
+ *
+ * Will throw an error if the given register ID is not in use.
+ *
+ * @param id: The register to read
+ * @returns The contents of the given register
+ *
+ * @example Register.readRegisterString(0L)
+ */
+export let readRegisterString = id => {
+  let idW = Conv.fromInt64(id)
+  let valueLen = Native.registerLen(idW)
+  let value = allocateString(WasmI32.wrapI64(valueLen))
+  Native.readRegister(idW, WasmI64.extendI32U(WasmI32.add(value, 8n)))
+  WasmI32.toGrain(value): (String)
+}
+
+/**
+ * Reads the contents of the given register, interpreting
+ * the data as a byte sequence.
+ *
+ * Will throw an error if the given register ID is not in use.
+ *
+ * @param id: The register to read
+ * @returns The contents of the given register
+ *
+ * @example Register.readRegisterBytes(0L)
+ */
+export let readRegisterBytes = id => {
+  let idW = Conv.fromInt64(id)
+  let valueLen = Native.registerLen(idW)
+  let value = allocateBytes(WasmI32.wrapI64(valueLen))
+  Native.readRegister(idW, WasmI64.extendI32U(WasmI32.add(value, 8n)))
+  WasmI32.toGrain(value): (Bytes)
+}
+
+/**
+ * Reads the contents of the given register, interpreting
+ * the data as a 32-bit integer.
+ *
+ * Will throw an error if the given register ID is not in use.
+ *
+ * @param id: The register to read
+ * @returns The contents of the given register
+ *
+ * @example Register.readRegisterInt32(0L)
+ */
+export let readRegisterInt32 = id => {
+  let idW = Conv.fromInt64(id)
+  let valueLen = Native.registerLen(idW)
+  assert WasmI64.eq(valueLen, 4N)
+  let value = allocateInt32()
+  Native.readRegister(idW, WasmI64.extendI32U(WasmI32.add(value, 8n)))
+  WasmI32.toGrain(value): (Int32)
+}
+
+/**
+ * Reads the contents of the given register, interpreting
+ * the data as a 64-bit integer.
+ *
+ * Will throw an error if the given register ID is not in use.
+ *
+ * @param id: The register to read
+ * @returns The contents of the given register
+ *
+ * @example Register.readRegisterInt64(0L)
+ */
+export let readRegisterInt64 = id => {
+  let idW = Conv.fromInt64(id)
+  let valueLen = Native.registerLen(idW)
+  assert WasmI64.eq(valueLen, 8N)
+  let value = allocateInt64()
+  Native.readRegister(idW, WasmI64.extendI32U(WasmI32.add(value, 8n)))
+  WasmI32.toGrain(value): (Int64)
+}
+
+// [TODO] migrate to actual int128/int256 types when available
+
+/**
+ * Reads the contents of the given register, interpreting
+ * the data as a 128-bit integer.
+ *
+ * Will throw an error if the given register ID is not in use.
+ *
+ * @param id: The register to read
+ * @returns The contents of the given register
+ *
+ * @example Register.readRegisterInt128(0L)
+ */
+export let readRegisterInt128 = id => {
+  let idW = Conv.fromInt64(id)
+  let valueLen = Native.registerLen(idW)
+  assert WasmI64.eq(valueLen, 16N)
+  let value = WasmI32.fromGrain(Int128.allocate())
+  Native.readRegister(idW, WasmI64.extendI32U(WasmI32.add(value, 8n)))
+  WasmI32.toGrain(value): (Bytes)
+}
+
+/**
+ * Reads the contents of the given register, interpreting
+ * the data as a 256-bit integer.
+ *
+ * Will throw an error if the given register ID is not in use.
+ *
+ * @param id: The register to read
+ * @returns The contents of the given register
+ *
+ * @example Register.readRegisterInt256(0L)
+ */
+export let readRegisterInt256 = id => {
+  let idW = Conv.fromInt64(id)
+  let valueLen = Native.registerLen(idW)
+  assert WasmI64.eq(valueLen, 32N)
+  let value = WasmI32.fromGrain(Int256.allocate())
+  Native.readRegister(idW, WasmI64.extendI32U(WasmI32.add(value, 8n)))
+  WasmI32.toGrain(value): (Bytes)
+}
+
+/**
+ * Reads the contents of the given register, interpreting
+ * the data as an address.
+ *
+ * Will throw an error if the given register ID is not in use.
+ *
+ * @param id: The register to read
+ * @returns The contents of the given register
+ *
+ * @example Register.readRegisterAccountId(0L)
+ */
+export let readRegisterAccountId = id => {
+  AccountId.fromBytes(readRegisterBytes(id))
+}

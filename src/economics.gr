@@ -1,0 +1,75 @@
+/* grainc-flags --no-gc */
+import WasmI32 from "runtime/unsafe/wasmi32"
+import WasmI64 from "runtime/unsafe/wasmi64"
+import Conv from "runtime/unsafe/conv"
+import Native from "./internal/native"
+import Int128 from "./internal/int128"
+
+/**
+ * The current balance of the given account. This includes the attached_deposit that was
+ * attached to the transaction.
+ *
+ * @returns The current account balance (a 128-bit integer)
+ *
+ * @example Economics.accountBalance()
+ */
+let accountBalance = () => {
+  let ret = Int128.allocate()
+  Native.accountBalance(
+    WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(ret), 8n)),
+  )
+  ret
+}
+
+/**
+ * The current amount of tokens locked due to staking.
+ *
+ * @returns The currently staked account balance (a 128-bit integer)
+ *
+ * @example Economics.accountLockedBalance()
+ */
+let accountLockedBalance = () => {
+  let ret = Int128.allocate()
+  Native.accountLockedBalance(
+    WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(ret), 8n)),
+  )
+  ret
+}
+
+/**
+ * The balance that was attached to the call that will be immediately deposited before the
+ * contract execution starts.
+ *
+ * @returns The attached deposit (a 128-bit integer)
+ *
+ * @example Economics.accountLockedBalance()
+ */
+let attachedDeposit = () => {
+  let ret = Int128.allocate()
+  Native.attachedDeposit(
+    WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(ret), 8n)),
+  )
+  ret
+}
+
+/**
+ * The amount of gas attached to the call that can be used to pay for the gas fees.
+ *
+ * @returns The prepaid gas
+ *
+ * @example Economics.prepaidGas()
+ */
+let prepaidGas = () => {
+  Conv.toInt64(Native.prepaidGas())
+}
+
+/**
+ * The gas that was already burnt during the contract execution (cannot exceed `prepaidGas`)
+ *
+ * @returns The used gas
+ *
+ * @example Economics.usedGas()
+ */
+let usedGas = () => {
+  Conv.toInt64(Native.usedGas())
+}

@@ -1,0 +1,112 @@
+/* grainc-flags --no-gc */
+// Workaround until int128 support is added to Grain
+
+import WasmI32 from "runtime/unsafe/wasmi32"
+import WasmI64 from "runtime/unsafe/wasmi64"
+import Int32 from "int32"
+import Int64 from "int64"
+import Bytes from "bytes"
+
+// grain-lang/grain#831
+let i64ltU = (x: Int64, y: Int64) => {
+  let x = WasmI64.load(WasmI32.fromGrain(x), 8n)
+  let y = WasmI64.load(WasmI32.fromGrain(y), 8n)
+  WasmI64.ltU(x, y)
+}
+
+// grain-lang/grain#831
+let i64gtU = (x: Int64, y: Int64) => {
+  let x = WasmI64.load(WasmI32.fromGrain(x), 8n)
+  let y = WasmI64.load(WasmI32.fromGrain(y), 8n)
+  WasmI64.gtU(x, y)
+}
+
+export let allocate = () => {
+  let ret = Bytes.make(16)
+  Bytes.fill(0l, ret)
+  ret
+}
+
+export let fromInt64 = n => {
+  let ret = allocate()
+  Bytes.setInt64(0, n, ret)
+  ret
+}
+
+export let lt = (a, b) => {
+  let aBytes = a
+  let bBytes = b
+  let mut res = false
+  for (let mut i = 1; i >= 0; i -= 1) {
+    let aPiece = Bytes.getInt64(i * 8, aBytes)
+    let bPiece = Bytes.getInt64(i * 8, bBytes)
+    if (i64ltU(aPiece, bPiece)) {
+      res = true
+      break
+    }
+  }
+  res
+}
+
+export let lte = (a, b) => {
+  (a == b) || (lt(a, b))
+}
+
+export let gt = (a, b) => {
+  let aBytes = a
+  let bBytes = b
+  let mut res = false
+  for (let mut i = 1; i >= 0; i -= 1) {
+    let aPiece = Bytes.getInt64(i * 8, aBytes)
+    let bPiece = Bytes.getInt64(i * 8, bBytes)
+    if (i64gtU(aPiece, bPiece)) {
+      res = true
+      break
+    }
+  }
+  res
+}
+
+export let gte = (a, b) => {
+  (a == b) || (gt(a, b))
+}
+
+export let add = (a, b) => {
+  let aBytes = a
+  let bBytes = b
+  let retBytes = Bytes.make(16)
+  let mut res = false
+  let mut carry = 0L
+  for (let mut i = 1; i >= 0; i -= 1) {
+    let aPiece = Bytes.getInt64(i * 8, aBytes)
+    let bPiece = Bytes.getInt64(i * 8, bBytes)
+    let retPiece = Int64.add(Int64.add(aPiece, bPiece), carry)
+    if (i64ltU(retPiece, aPiece)) {
+      carry = 1L
+    } else {
+      carry = 0L
+    }
+    Bytes.setInt64(i * 8, retPiece, retBytes)
+  }
+  retBytes
+}
+
+export let sub = (a, b) => {
+  let aBytes = a
+  let bBytes = b
+  let retBytes = Bytes.make(16)
+  let mut res = false
+  let mut carry = 0L
+  for (let mut i = 1; i >= 0; i -= 1) {
+    let aPiece = Bytes.getInt64(i * 8, aBytes)
+    let bPiece = Bytes.getInt64(i * 8, bBytes)
+    let retPiece = Int64.sub(Int64.sub(aPiece, bPiece), carry)
+    if (i64gtU(retPiece, aPiece)) {
+      carry = 1L
+    } else {
+      carry = 0L
+    }
+    Bytes.setInt64(i * 8, retPiece, retBytes)
+  }
+  retBytes
+}

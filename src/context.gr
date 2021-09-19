@@ -1,0 +1,114 @@
+/* grainc-flags --no-gc */
+import WasmI32 from "runtime/unsafe/wasmi32"
+import WasmI64 from "runtime/unsafe/wasmi64"
+import Conv from "runtime/unsafe/conv"
+import Native from "./internal/native"
+import Register from "./register"
+
+/**
+ * Gets the account ID of the current contract that we are executing.
+ * This function will overwrite the contents of register 0.
+ *
+ * @returns The account ID
+ *
+ * @example Context.currentAccountId()
+ */
+let currentAccountId = () => {
+  Native.currentAccountId(0N)
+  Register.readRegisterAccountId(0L)
+}
+
+/**
+ * All contract calls are a result of some transaction that was signed by some account using
+ * some access key and submitted into a memory pool (either through the wallet using RPC or by
+ * a node itself). This function returns the ID of that account.
+ * This function will overwrite the contents of register 0.
+ *
+ * @returns The account ID
+ *
+ * @example Context.signerAccountId()
+ */
+let signerAccountId = () => {
+  Native.signerAccountId(0N)
+  Register.readRegisterAccountId(0L)
+}
+
+/**
+ * Saves the public key of the access key that was used by the signer into the register. In
+ * rare situations smart contract might want to know the exact access key that was used to send
+ * the original transaction, e.g. to increase the allowance or manipulate with the public key.
+ * This function will overwrite the contents of register 0.
+ *
+ * @returns The account public key
+ *
+ * @example Context.signerAccountPublicKey()
+ */
+let signerAccountPublicKey = () => {
+  Native.signerAccountPk(0N)
+  Register.readRegisterBytes(0L)
+}
+
+/**
+ * All contract calls are a result of a receipt, this receipt might be created by a transaction
+ * that does function invocation on the contract or another contract as a result of
+ * cross-contract call.
+ * This function will overwrite the contents of register 0.
+ *
+ * @returns The account ID
+ *
+ * @example Context.predecessorAccountId()
+ */
+let predecessorAccountId = () => {
+  Native.predecessorAccountId(0N)
+  Register.readRegisterAccountId(0L)
+}
+
+/**
+ * Returns the current block height.
+ *
+ * @returns The current block height
+ *
+ * @example Context.blockHeight()
+ */
+let blockHeight = () => {
+  Conv.toInt64(Native.blockIndex())
+}
+
+/**
+ * Returns the current block timestamp (number of
+ * non-leap-nanoseconds since January 1, 1970 0:00:00 UTC).
+ *
+ * @returns The current block timestamp
+ *
+ * @example Context.blockTimestamp()
+ */
+let blockTimestamp = () => {
+  Conv.toInt64(Native.blockTimestamp())
+}
+
+/**
+ * Returns the current epoch height.
+ *
+ * @returns The current epoch height
+ *
+ * @example Context.epochHeight()
+ */
+let epochHeight = () => {
+  Conv.toInt64(Native.epochHeight())
+}
+
+/**
+ * Returns the number of bytes used by the contract if it was saved to the trie as of the
+ * invocation. This includes:
+ * - The data written with storage* functions during current and previous execution
+ * - The bytes needed to store the access keys of the given account.
+ * - The contract code size
+ * - A small fixed overhead for account metadata.
+ *
+ * @returns The current storage usage
+ *
+ * @example Context.storageUsage()
+ */
+let storageUsage = () => {
+  Conv.toInt64(Native.storageUsage())
+}

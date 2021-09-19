@@ -1,0 +1,50 @@
+/* grainc-flags --no-gc */
+import WasmI32 from "runtime/unsafe/wasmi32"
+import WasmI64 from "runtime/unsafe/wasmi64"
+import Native from "./internal/native"
+import Register from "./register"
+
+export enum HashAlgorithm { SHA256, KECCAK256, KECCAK512, RIPEMD160 }
+
+let performHash = (alg, valueLen, valuePtr, register) => {
+  match (alg) {
+    SHA256 => Native.sha256(valueLen, valuePtr, register),
+    KECCAK256 => Native.keccak256(valueLen, valuePtr, register),
+    KECCAK512 => Native.keccak512(valueLen, valuePtr, register),
+    RIPEMD160 => Native.ripemd160(valueLen, valuePtr, register),
+  }
+}
+
+/**
+ * Hashes the given byte sequence using the given hash algorithm.
+ * This function will overwrite the contents of register 0.
+ *
+ * @param alg: The hashing algorithm to use
+ * @param value: The value to hash
+ * @returns The hash
+ *
+ * @example Math.hashBytes(Math.SHA256, data)
+ */
+export let hashBytes = (alg, value: Bytes) => {
+  let ptr = WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(value), 8n))
+  let len = WasmI64.load32U(WasmI32.fromGrain(value), 4n)
+  performHash(alg, len, ptr, 0N)
+  Register.readRegisterBytes(0L)
+}
+
+/**
+ * Hashes the given string using the given hash algorithm.
+ * This function will overwrite the contents of register 0.
+ *
+ * @param alg: The hashing algorithm to use
+ * @param value: The value to hash
+ * @returns The hash
+ *
+ * @example Math.hashString(Math.SHA256, data)
+ */
+export let hashString = (alg, value: String) => {
+  let ptr = WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(value), 8n))
+  let len = WasmI64.load32U(WasmI32.fromGrain(value), 4n)
+  performHash(alg, len, ptr, 0N)
+  Register.readRegisterBytes(0L)
+}

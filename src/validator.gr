@@ -1,0 +1,41 @@
+/* grainc-flags --no-gc */
+
+import Native from "./internal/native"
+import AccountId from "./accountId"
+import Int128 from "./internal/int128"
+import WasmI32 from "runtime/unsafe/wasmi32"
+import WasmI64 from "runtime/unsafe/wasmi64"
+
+/**
+ * Get the stake of an account, if the account is currently a validator. Otherwise returns 0.
+ *
+ * @param accountId: The account to look up
+ * @returns The stake of `accountId` (a 128-bit integer)
+ *
+ * @example Validator.stake(address)
+ */
+let stake = (accountId: AccountId.AccountId) => {
+  let addressBytes = AccountId.toBytes(accountId)
+  let ret = Int128.allocate()
+  let addressPtr = WasmI64.extendI32U(
+    WasmI32.add(WasmI32.fromGrain(addressBytes), 8n),
+  )
+  let addressLen = WasmI64.load32U(WasmI32.fromGrain(addressBytes), 4n)
+  let retPtr = WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(ret), 8n))
+  Native.validatorStake(addressLen, addressPtr, retPtr)
+  ret
+}
+
+/**
+ * Get the total validator stake of the current epoch.
+ *
+ * @returns The total validator stake (a 128-bit integer)
+ *
+ * @example Validator.totalStake()
+ */
+let totalStake = () => {
+  let ret = Int128.allocate()
+  let retPtr = WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(ret), 8n))
+  Native.validatorTotalStake(retPtr)
+  ret
+}

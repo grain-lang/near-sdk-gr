@@ -24,7 +24,7 @@ record Promise { index: Int64 }
  * @param arguments: The arguments to the function (a JSON-formatteds tring)
  * @param amount: The amount to attach to the function call (a 128-bit integer)
  * @param gas: The amount of gas to attach to the function call
- * @return The new promise
+ * @returns The new promise
  */
 export let create =
   (
@@ -72,7 +72,7 @@ export let create =
  * @param arguments: The arguments to the function (a JSON-formatteds tring)
  * @param amount: The amount to attach to the function call (a 128-bit integer)
  * @param gas: The amount of gas to attach to the function call
- * @return The new promise
+ * @returns The new promise
  */
 export let then =
   (
@@ -128,7 +128,7 @@ let preparePromises = (promises: Array<Promise>) => {
  * Creates a new promise which completes when time all promises passed as arguments complete.
  *
  * @param promises: The array of promises that need to be waited on jointly.
- * @return The new promise
+ * @returns The new promise
  */
 export let and = (promises: Array<Promise>) => {
   let prepared = preparePromises(promises)
@@ -141,9 +141,7 @@ export let and = (promises: Array<Promise>) => {
 }
 
 /**
- * @section Batched Actions
- *
- * For more information, see https://github.com/nearprotocol/NEPs/pull/8/files#diff-15b6752ec7d78e7b85b8c7de4a19cbd4R48
+ * @section Batched Actions: For more information, see https://github.com/nearprotocol/NEPs/pull/8/files#diff-15b6752ec7d78e7b85b8c7de4a19cbd4R48
  */
 
 /**
@@ -450,7 +448,7 @@ export let batchActionDeleteAccount =
 }
 
 /**
- * @section Promise Results
+ * @section Promise Results: Results
  */
 
 /**

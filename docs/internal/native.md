@@ -40,6 +40,12 @@ signerAccountPk : WasmI64 -> Void
 predecessorAccountId : WasmI64 -> Void
 ```
 
+### Native.**input**
+
+```grain
+input : WasmI64 -> Void
+```
+
 ### Native.**blockIndex**
 
 ```grain

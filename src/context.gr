@@ -113,3 +113,29 @@ export let epochHeight = () => {
 export let storageUsage = () => {
   Conv.toInt64(Native.storageUsage())
 }
+
+/**
+ * Reads the input to the contract call, formatted as a byte sequence.
+ * This function overwrites the contents of register 0.
+ *
+ * @returns The input to the contract
+ *
+ * @example Context.inputBytes()
+ */
+export let inputBytes = () => {
+  Native.input(0N)
+  Register.readRegisterBytes(0L)
+}
+
+/**
+ * Reads the input to the contract call, formatted as a string.
+ * This function overwrites the contents of register 0.
+ *
+ * @returns The input to the contract
+ *
+ * @example Context.inputString()
+ */
+export let inputString = () => {
+  Native.input(0N)
+  Register.readRegisterBytes(0L)
+}

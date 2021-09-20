@@ -129,6 +129,14 @@ export foreign wasm signer_account_pk: WasmI64 -> Void as signerAccountPk from "
 //
 // register_id
 export foreign wasm predecessor_account_id: WasmI64 -> Void as predecessorAccountId from "env"
+/// Reads input to the contract call into the register. Input is expected to be in JSON-format.
+/// If input is provided saves the bytes (potentially zero) of input into register. If input is
+/// not provided writes 0 bytes into the register.
+///
+/// # Cost
+///
+/// `base + write_register_base + write_register_byte * num_bytes`
+export foreign wasm input: WasmI64 -> Void from "env"
 /// Returns the current block height.
 ///
 /// # Cost

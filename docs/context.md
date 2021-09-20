@@ -174,3 +174,45 @@ Examples:
 Context.storageUsage()
 ```
 
+### Context.**inputBytes**
+
+```grain
+inputBytes : () -> Bytes
+```
+
+Reads the input to the contract call, formatted as a byte sequence.
+This function overwrites the contents of register 0.
+
+Returns:
+
+|type|description|
+|----|-----------|
+|`Bytes`|The input to the contract|
+
+Examples:
+
+```grain
+Context.inputBytes()
+```
+
+### Context.**inputString**
+
+```grain
+inputString : () -> Bytes
+```
+
+Reads the input to the contract call, formatted as a string.
+This function overwrites the contents of register 0.
+
+Returns:
+
+|type|description|
+|----|-----------|
+|`Bytes`|The input to the contract|
+
+Examples:
+
+```grain
+Context.inputString()
+```
+

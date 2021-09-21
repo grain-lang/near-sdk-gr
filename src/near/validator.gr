@@ -1,7 +1,6 @@
 /* grainc-flags --no-gc */
 
 import Native from "./internal/native"
-import AccountId from "./accountId"
 import Int128 from "./internal/int128"
 import WasmI32 from "runtime/unsafe/wasmi32"
 import WasmI64 from "runtime/unsafe/wasmi64"
@@ -14,13 +13,12 @@ import WasmI64 from "runtime/unsafe/wasmi64"
  *
  * @example Validator.stake(address)
  */
-export let stake = (accountId: AccountId.AccountId) => {
-  let addressBytes = AccountId.toBytes(accountId)
+export let stake = (accountId: String) => {
   let ret = Int128.allocate()
   let addressPtr = WasmI64.extendI32U(
-    WasmI32.add(WasmI32.fromGrain(addressBytes), 8n),
+    WasmI32.add(WasmI32.fromGrain(accountId), 8n),
   )
-  let addressLen = WasmI64.load32U(WasmI32.fromGrain(addressBytes), 4n)
+  let addressLen = WasmI64.load32U(WasmI32.fromGrain(accountId), 4n)
   let retPtr = WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(ret), 8n))
   Native.validatorStake(addressLen, addressPtr, retPtr)
   ret

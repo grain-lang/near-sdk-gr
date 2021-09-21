@@ -29,7 +29,7 @@ export let hashBytes = (alg, value: Bytes) => {
   let ptr = WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(value), 8n))
   let len = WasmI64.load32U(WasmI32.fromGrain(value), 4n)
   performHash(alg, len, ptr, 0N)
-  Register.readRegisterBytes(0L)
+  Register.readBytes(0L)
 }
 
 /**
@@ -46,5 +46,5 @@ export let hashString = (alg, value: String) => {
   let ptr = WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(value), 8n))
   let len = WasmI64.load32U(WasmI32.fromGrain(value), 4n)
   performHash(alg, len, ptr, 0N)
-  Register.readRegisterBytes(0L)
+  Register.readBytes(0L)
 }

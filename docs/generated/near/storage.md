@@ -1,19 +1,7 @@
-### Storage.**StorageKey**
-
-```grain
-enum StorageKey {
-  StringKey(String),
-  BytesKey(Bytes),
-  AccountIdKey(AccountId.AccountId),
-}
-```
-
-The different types of storage keys available
-
 ### Storage.**hasKey**
 
 ```grain
-hasKey : StorageKey -> Bool
+hasKey : String -> Bool
 ```
 
 Checks whether the given key exists in storage.
@@ -22,7 +10,7 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`key`|`StorageKey`|The key to check for|
+|`key`|`String`|The key to check for|
 
 Returns:
 
@@ -39,7 +27,7 @@ Storage.hasKey(Storage.StringKey("foo"))
 ### Storage.**getString**
 
 ```grain
-getString : StorageKey -> Option<String>
+getString : String -> Option<String>
 ```
 
 Looks up the given key in storage, returning any associated data
@@ -50,7 +38,7 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`key`|`StorageKey`|The key to check for|
+|`key`|`String`|The key to check for|
 
 Returns:
 
@@ -67,7 +55,7 @@ Storage.getString(Storage.StringKey("foo"))
 ### Storage.**getBytes**
 
 ```grain
-getBytes : StorageKey -> Option<Bytes>
+getBytes : String -> Option<Bytes>
 ```
 
 Looks up the given key in storage, returning any associated data
@@ -78,7 +66,7 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`key`|`StorageKey`|The key to check for|
+|`key`|`String`|The key to check for|
 
 Returns:
 
@@ -95,7 +83,7 @@ Storage.getBytes(Storage.StringKey("foo"))
 ### Storage.**getInt32**
 
 ```grain
-getInt32 : StorageKey -> Option<Int32>
+getInt32 : String -> Option<Int32>
 ```
 
 Looks up the given key in storage, returning any associated data
@@ -106,7 +94,7 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`key`|`StorageKey`|The key to check for|
+|`key`|`String`|The key to check for|
 
 Returns:
 
@@ -123,7 +111,7 @@ Storage.getInt32(Storage.StringKey("foo"))
 ### Storage.**getInt64**
 
 ```grain
-getInt64 : StorageKey -> Option<Int64>
+getInt64 : String -> Option<Int64>
 ```
 
 Looks up the given key in storage, returning any associated data
@@ -134,7 +122,7 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`key`|`StorageKey`|The key to check for|
+|`key`|`String`|The key to check for|
 
 Returns:
 
@@ -151,7 +139,7 @@ Storage.getInt64(Storage.StringKey("foo"))
 ### Storage.**getInt128**
 
 ```grain
-getInt128 : StorageKey -> Option<Bytes>
+getInt128 : String -> Option<Bytes>
 ```
 
 Looks up the given key in storage, returning any associated data
@@ -162,7 +150,7 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`key`|`StorageKey`|The key to check for|
+|`key`|`String`|The key to check for|
 
 Returns:
 
@@ -179,7 +167,7 @@ Storage.getInt128(Storage.StringKey("foo"))
 ### Storage.**getInt256**
 
 ```grain
-getInt256 : StorageKey -> Option<Bytes>
+getInt256 : String -> Option<Bytes>
 ```
 
 Looks up the given key in storage, returning any associated data
@@ -190,7 +178,7 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`key`|`StorageKey`|The key to check for|
+|`key`|`String`|The key to check for|
 
 Returns:
 
@@ -207,7 +195,7 @@ Storage.getInt256(Storage.StringKey("foo"))
 ### Storage.**setString**
 
 ```grain
-setString : (StorageKey, String) -> Bool
+setString : (String, String) -> Void
 ```
 
 Associates the given key in storage with the given string.
@@ -218,14 +206,14 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`key`|`StorageKey`|The key to store|
+|`key`|`String`|The key to store|
 |`value`|`String`|The value to store|
 
 Returns:
 
 |type|description|
 |----|-----------|
-|`Bool`|`true` if the operation overwrites an existing value, otherwise `false`.|
+|`Void`|`true` if the operation overwrites an existing value, otherwise `false`.|
 
 Examples:
 
@@ -236,7 +224,7 @@ Storage.setString(Storage.StringKey("foo"), "bar")
 ### Storage.**setBytes**
 
 ```grain
-setBytes : (StorageKey, Bytes) -> Bool
+setBytes : (String, Bytes) -> Void
 ```
 
 Associates the given key in storage with the given byte data.
@@ -247,14 +235,14 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`key`|`StorageKey`|The key to store|
+|`key`|`String`|The key to store|
 |`value`|`Bytes`|The value to store|
 
 Returns:
 
 |type|description|
 |----|-----------|
-|`Bool`|`true` if the operation overwrites an existing value, otherwise `false`.|
+|`Void`|`true` if the operation overwrites an existing value, otherwise `false`.|
 
 Examples:
 
@@ -265,7 +253,7 @@ Storage.setBytes(Storage.StringKey("foo"), Bytes.fromString("bar"))
 ### Storage.**setInt32**
 
 ```grain
-setInt32 : (StorageKey, Int32) -> Bool
+setInt32 : (String, Int32) -> Void
 ```
 
 Associates the given key in storage with the given 32-bit integer.
@@ -276,14 +264,14 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`key`|`StorageKey`|The key to store|
+|`key`|`String`|The key to store|
 |`value`|`Int32`|The value to store|
 
 Returns:
 
 |type|description|
 |----|-----------|
-|`Bool`|`true` if the operation overwrites an existing value, otherwise `false`.|
+|`Void`|`true` if the operation overwrites an existing value, otherwise `false`.|
 
 Examples:
 
@@ -294,7 +282,7 @@ Storage.setInt32(Storage.StringKey("foo"), 42l)
 ### Storage.**setInt64**
 
 ```grain
-setInt64 : (StorageKey, Int64) -> Bool
+setInt64 : (String, Int64) -> Void
 ```
 
 Associates the given key in storage with the given 64-bit integer.
@@ -305,14 +293,14 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`key`|`StorageKey`|The key to store|
+|`key`|`String`|The key to store|
 |`value`|`Int64`|The value to store|
 
 Returns:
 
 |type|description|
 |----|-----------|
-|`Bool`|`true` if the operation overwrites an existing value, otherwise `false`.|
+|`Void`|`true` if the operation overwrites an existing value, otherwise `false`.|
 
 Examples:
 
@@ -323,7 +311,7 @@ Storage.setInt64(Storage.StringKey("foo"), 42L)
 ### Storage.**setInt128**
 
 ```grain
-setInt128 : (StorageKey, Bytes) -> Bool
+setInt128 : (String, Bytes) -> Void
 ```
 
 Associates the given key in storage with the given 128-bit integer.
@@ -334,14 +322,14 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`key`|`StorageKey`|The key to store|
+|`key`|`String`|The key to store|
 |`value`|`Bytes`|The value to store|
 
 Returns:
 
 |type|description|
 |----|-----------|
-|`Bool`|`true` if the operation overwrites an existing value, otherwise `false`.|
+|`Void`|`true` if the operation overwrites an existing value, otherwise `false`.|
 
 Examples:
 
@@ -352,7 +340,7 @@ Storage.setInt128(Storage.StringKey("foo"), Int128.fromInt64(5L))
 ### Storage.**setInt256**
 
 ```grain
-setInt256 : (StorageKey, Bytes) -> Bool
+setInt256 : (String, Bytes) -> Void
 ```
 
 Associates the given key in storage with the given 256-bit integer.
@@ -363,14 +351,14 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`key`|`StorageKey`|The key to store|
+|`key`|`String`|The key to store|
 |`value`|`Bytes`|The value to store|
 
 Returns:
 
 |type|description|
 |----|-----------|
-|`Bool`|`true` if the operation overwrites an existing value, otherwise `false`.|
+|`Void`|`true` if the operation overwrites an existing value, otherwise `false`.|
 
 Examples:
 
@@ -378,10 +366,10 @@ Examples:
 Storage.setInt256(Storage.StringKey("foo"), Int256.fromInt64(5L))
 ```
 
-### Storage.**swapString**
+### Storage.**replaceString**
 
 ```grain
-swapString : (StorageKey, String) -> Option<String>
+replaceString : (String, String) -> Option<String>
 ```
 
 Associates the given key in storage with the given string,
@@ -393,7 +381,7 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`key`|`StorageKey`|The key to store|
+|`key`|`String`|The key to store|
 |`value`|`String`|The value to store|
 
 Returns:
@@ -405,13 +393,13 @@ Returns:
 Examples:
 
 ```grain
-Storage.swapString(Storage.StringKey("foo"), "bar")
+Storage.replaceString(Storage.StringKey("foo"), "bar")
 ```
 
-### Storage.**swapBytes**
+### Storage.**replaceBytes**
 
 ```grain
-swapBytes : (StorageKey, Bytes) -> Option<Bytes>
+replaceBytes : (String, Bytes) -> Option<Bytes>
 ```
 
 Associates the given key in storage with the given byte data,
@@ -423,7 +411,7 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`key`|`StorageKey`|The key to store|
+|`key`|`String`|The key to store|
 |`value`|`Bytes`|The value to store|
 
 Returns:
@@ -435,13 +423,13 @@ Returns:
 Examples:
 
 ```grain
-Storage.swapBytes(Storage.StringKey("foo"), Bytes.fromString("bar"))
+Storage.replaceBytes(Storage.StringKey("foo"), Bytes.fromString("bar"))
 ```
 
-### Storage.**swapInt32**
+### Storage.**replaceInt32**
 
 ```grain
-swapInt32 : (StorageKey, Int32) -> Option<Int32>
+replaceInt32 : (String, Int32) -> Option<Int32>
 ```
 
 Associates the given key in storage with the given 32-bit integer,
@@ -453,7 +441,7 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`key`|`StorageKey`|The key to store|
+|`key`|`String`|The key to store|
 |`value`|`Int32`|The value to store|
 
 Returns:
@@ -465,13 +453,13 @@ Returns:
 Examples:
 
 ```grain
-Storage.swapInt32(Storage.StringKey("foo"), 42l)
+Storage.replaceInt32(Storage.StringKey("foo"), 42l)
 ```
 
-### Storage.**swapInt64**
+### Storage.**replaceInt64**
 
 ```grain
-swapInt64 : (StorageKey, Int64) -> Option<Int64>
+replaceInt64 : (String, Int64) -> Option<Int64>
 ```
 
 Associates the given key in storage with the given 64-bit integer,
@@ -483,7 +471,7 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`key`|`StorageKey`|The key to store|
+|`key`|`String`|The key to store|
 |`value`|`Int64`|The value to store|
 
 Returns:
@@ -498,10 +486,10 @@ Examples:
 Storage.setInt64(Storage.StringKey("foo"), 42L)
 ```
 
-### Storage.**swapInt128**
+### Storage.**replaceInt128**
 
 ```grain
-swapInt128 : (StorageKey, Bytes) -> Option<Bytes>
+replaceInt128 : (String, Bytes) -> Option<Bytes>
 ```
 
 Associates the given key in storage with the given 128-bit integer,
@@ -513,7 +501,7 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`key`|`StorageKey`|The key to store|
+|`key`|`String`|The key to store|
 |`value`|`Bytes`|The value to store|
 
 Returns:
@@ -528,10 +516,10 @@ Examples:
 Storage.setInt128(Storage.StringKey("foo"), Int128.fromInt64(5L))
 ```
 
-### Storage.**swapInt256**
+### Storage.**replaceInt256**
 
 ```grain
-swapInt256 : (StorageKey, Bytes) -> Option<Bytes>
+replaceInt256 : (String, Bytes) -> Option<Bytes>
 ```
 
 Associates the given key in storage with the given 256-bit integer,
@@ -543,7 +531,7 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`key`|`StorageKey`|The key to store|
+|`key`|`String`|The key to store|
 |`value`|`Bytes`|The value to store|
 
 Returns:
@@ -558,10 +546,10 @@ Examples:
 Storage.setInt256(Storage.StringKey("foo"), Int256.fromInt64(5L))
 ```
 
-### Storage.**removeString**
+### Storage.**popString**
 
 ```grain
-removeString : StorageKey -> Option<String>
+popString : String -> Option<String>
 ```
 
 Removes any storage entry associated with the given key,
@@ -573,7 +561,7 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`key`|`StorageKey`|The key to remove|
+|`key`|`String`|The key to remove|
 
 Returns:
 
@@ -584,13 +572,13 @@ Returns:
 Examples:
 
 ```grain
-Storage.removeString(Storage.StringKey("foo"))
+Storage.popString(Storage.StringKey("foo"))
 ```
 
-### Storage.**removeBytes**
+### Storage.**popBytes**
 
 ```grain
-removeBytes : StorageKey -> Option<Bytes>
+popBytes : String -> Option<Bytes>
 ```
 
 Removes any storage entry associated with the given key,
@@ -602,7 +590,7 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`key`|`StorageKey`|The key to remove|
+|`key`|`String`|The key to remove|
 
 Returns:
 
@@ -613,13 +601,13 @@ Returns:
 Examples:
 
 ```grain
-Storage.removeBytes(Storage.StringKey("foo"))
+Storage.popBytes(Storage.StringKey("foo"))
 ```
 
-### Storage.**removeInt32**
+### Storage.**popInt32**
 
 ```grain
-removeInt32 : StorageKey -> Option<Int32>
+popInt32 : String -> Option<Int32>
 ```
 
 Removes any storage entry associated with the given key,
@@ -631,7 +619,7 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`key`|`StorageKey`|The key to remove|
+|`key`|`String`|The key to remove|
 
 Returns:
 
@@ -642,13 +630,13 @@ Returns:
 Examples:
 
 ```grain
-Storage.removeInt32(Storage.StringKey("foo"))
+Storage.popInt32(Storage.StringKey("foo"))
 ```
 
-### Storage.**removeInt64**
+### Storage.**popInt64**
 
 ```grain
-removeInt64 : StorageKey -> Option<Int64>
+popInt64 : String -> Option<Int64>
 ```
 
 Removes any storage entry associated with the given key,
@@ -660,7 +648,7 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`key`|`StorageKey`|The key to remove|
+|`key`|`String`|The key to remove|
 
 Returns:
 
@@ -671,13 +659,13 @@ Returns:
 Examples:
 
 ```grain
-Storage.removeInt64(Storage.StringKey("foo"))
+Storage.popInt64(Storage.StringKey("foo"))
 ```
 
-### Storage.**removeInt128**
+### Storage.**popInt128**
 
 ```grain
-removeInt128 : StorageKey -> Option<Bytes>
+popInt128 : String -> Option<Bytes>
 ```
 
 Removes any storage entry associated with the given key,
@@ -689,7 +677,7 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`key`|`StorageKey`|The key to remove|
+|`key`|`String`|The key to remove|
 
 Returns:
 
@@ -700,13 +688,13 @@ Returns:
 Examples:
 
 ```grain
-Storage.removeInt128(Storage.StringKey("foo"))
+Storage.popInt128(Storage.StringKey("foo"))
 ```
 
-### Storage.**removeInt256**
+### Storage.**popInt256**
 
 ```grain
-removeInt256 : StorageKey -> Option<Bytes>
+popInt256 : String -> Option<Bytes>
 ```
 
 Removes any storage entry associated with the given key,
@@ -718,7 +706,7 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`key`|`StorageKey`|The key to remove|
+|`key`|`String`|The key to remove|
 
 Returns:
 
@@ -729,13 +717,13 @@ Returns:
 Examples:
 
 ```grain
-Storage.removeInt256(Storage.StringKey("foo"))
+Storage.popInt256(Storage.StringKey("foo"))
 ```
 
 ### Storage.**remove**
 
 ```grain
-remove : StorageKey -> Bool
+remove : String -> Void
 ```
 
 Removes any storage entry associated with the given key.
@@ -746,13 +734,13 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`key`|`StorageKey`|The key to remove|
+|`key`|`String`|The key to remove|
 
 Returns:
 
 |type|description|
 |----|-----------|
-|`Bool`|Whether this operation removed data from storage|
+|`Void`|Whether this operation removed data from storage|
 
 Examples:
 

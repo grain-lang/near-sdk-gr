@@ -7,7 +7,7 @@ import Native from "./internal/native"
  * Sets the given byte sequence as the return value of the contract.
  *
  * @param bytes: The bytes to return
- * @example Utils.valueReturnString("something important")
+ * @example Utils.valueReturnBytes(Bytes.fromString("something important"))
  */
 export let valueReturnBytes = (bytes: Bytes) => {
   let ptr = WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(bytes), 8n))

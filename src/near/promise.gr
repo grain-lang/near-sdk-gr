@@ -4,7 +4,6 @@ import WasmI64 from "runtime/unsafe/wasmi64"
 import Conv from "runtime/unsafe/conv"
 import Native from "./internal/native"
 import Int128 from "./internal/int128"
-import AccountId from "./accountId"
 import Register from "./register"
 import Array from "array"
 import String from "string"
@@ -28,17 +27,16 @@ record Promise { index: Int64 }
  */
 export let create =
   (
-    accountId: AccountId.AccountId,
+    accountId: String,
     methodName: String,
     arguments: String,
     amount: Bytes,
     gas: Int64,
   ) => {
-  let accountBytes = AccountId.toBytes(accountId)
   let acctPtr = WasmI64.extendI32U(
-    WasmI32.add(WasmI32.fromGrain(accountBytes), 8n),
+    WasmI32.add(WasmI32.fromGrain(accountId), 8n),
   )
-  let acctLen = WasmI64.load32U(WasmI32.fromGrain(accountBytes), 4n)
+  let acctLen = WasmI64.load32U(WasmI32.fromGrain(accountId), 4n)
   let methodPtr = WasmI64.extendI32U(
     WasmI32.add(WasmI32.fromGrain(methodName), 8n),
   )
@@ -77,18 +75,17 @@ export let create =
 export let then =
   (
     promise: Promise,
-    accountId: AccountId.AccountId,
+    accountId: String,
     methodName: String,
     arguments: Bytes,
     amount: Bytes,
     gas: Int64,
   ) => {
   let { index } = promise
-  let accountBytes = AccountId.toBytes(accountId)
   let acctPtr = WasmI64.extendI32U(
-    WasmI32.add(WasmI32.fromGrain(accountBytes), 8n),
+    WasmI32.add(WasmI32.fromGrain(accountId), 8n),
   )
-  let acctLen = WasmI64.load32U(WasmI32.fromGrain(accountBytes), 4n)
+  let acctLen = WasmI64.load32U(WasmI32.fromGrain(accountId), 4n)
   let methodPtr = WasmI64.extendI32U(
     WasmI32.add(WasmI32.fromGrain(methodName), 8n),
   )
@@ -281,7 +278,7 @@ export let batchActionStake = (promise, amount: Bytes, publicKey: Bytes) => {
  */
 export record FunctionCallPermission {
   allowance: Option<Bytes>,
-  receiverId: AccountId.AccountId,
+  receiverId: String,
   methodNames: Array<String>, // [TODO] should this be List<String> instead?
 }
 
@@ -365,12 +362,9 @@ export let batchActionAddKey =
         WasmI32.add(WasmI32.fromGrain(allowance), 8n),
       )
       let receiverIdPtr = WasmI64.extendI32U(
-        WasmI32.add(WasmI32.fromGrain(AccountId.toBytes(receiverId)), 8n),
+        WasmI32.add(WasmI32.fromGrain(receiverId), 8n),
       )
-      let receiverIdLen = WasmI64.load32U(
-        WasmI32.fromGrain(AccountId.toBytes(receiverId)),
-        4n,
-      )
+      let receiverIdLen = WasmI64.load32U(WasmI32.fromGrain(receiverId), 4n)
       let preppedMethodNames = prepareMethodNames(methodNames)
       let methodNamesLen = Conv.fromInt64(
         Int64.fromNumber(Buffer.length(preppedMethodNames)),
@@ -427,19 +421,12 @@ export let batchActionDeleteKey = (promise, publicKey: Bytes) => {
  * @param promise: The promise to append the action to
  * @param publicKey: The account ID to transfer the remaining balance to
  */
-export let batchActionDeleteAccount =
-  (
-    promise,
-    beneficiaryId: AccountId.AccountId,
-  ) => {
+export let batchActionDeleteAccount = (promise, beneficiaryId: String) => {
   let { index } = promise
   let benificiaryPtr = WasmI64.extendI32U(
-    WasmI32.add(WasmI32.fromGrain(AccountId.toBytes(beneficiaryId)), 8n),
+    WasmI32.add(WasmI32.fromGrain(beneficiaryId), 8n),
   )
-  let benificiaryLen = WasmI64.load32U(
-    WasmI32.fromGrain(AccountId.toBytes(beneficiaryId)),
-    4n,
-  )
+  let benificiaryLen = WasmI64.load32U(WasmI32.fromGrain(beneficiaryId), 4n)
   Native.promiseBatchActionDeleteAccount(
     Conv.fromInt64(index),
     benificiaryLen,
@@ -501,7 +488,7 @@ export let checkResult = (resultIdx: Int64) => {
  */
 export let getResultBytes = (resultIdx: Int64) => {
   match (checkResult(resultIdx)) {
-    Some(true) => Some(Ok(Register.readRegisterBytes(0L))),
+    Some(true) => Some(Ok(Register.readBytes(0L))),
     Some(_) => Some(Err("Promise failed")),
     None => None,
   }
@@ -520,7 +507,7 @@ export let getResultBytes = (resultIdx: Int64) => {
  */
 export let getResultString = (resultIdx: Int64) => {
   match (checkResult(resultIdx)) {
-    Some(true) => Some(Ok(Register.readRegisterString(0L))),
+    Some(true) => Some(Ok(Register.readString(0L))),
     Some(_) => Some(Err("Promise failed")),
     None => None,
   }
@@ -539,7 +526,7 @@ export let getResultString = (resultIdx: Int64) => {
  */
 export let getResultInt32 = (resultIdx: Int64) => {
   match (checkResult(resultIdx)) {
-    Some(true) => Some(Ok(Register.readRegisterInt32(0L))),
+    Some(true) => Some(Ok(Register.readInt32(0L))),
     Some(_) => Some(Err("Promise failed")),
     None => None,
   }
@@ -558,7 +545,7 @@ export let getResultInt32 = (resultIdx: Int64) => {
  */
 export let getResultInt64 = (resultIdx: Int64) => {
   match (checkResult(resultIdx)) {
-    Some(true) => Some(Ok(Register.readRegisterInt64(0L))),
+    Some(true) => Some(Ok(Register.readInt64(0L))),
     Some(_) => Some(Err("Promise failed")),
     None => None,
   }
@@ -577,7 +564,7 @@ export let getResultInt64 = (resultIdx: Int64) => {
  */
 export let getResultInt128 = (resultIdx: Int64) => {
   match (checkResult(resultIdx)) {
-    Some(true) => Some(Ok(Register.readRegisterInt128(0L))),
+    Some(true) => Some(Ok(Register.readInt128(0L))),
     Some(_) => Some(Err("Promise failed")),
     None => None,
   }
@@ -596,26 +583,7 @@ export let getResultInt128 = (resultIdx: Int64) => {
  */
 export let getResultInt256 = (resultIdx: Int64) => {
   match (checkResult(resultIdx)) {
-    Some(true) => Some(Ok(Register.readRegisterInt256(0L))),
-    Some(_) => Some(Err("Promise failed")),
-    None => None,
-  }
-}
-
-/**
- * If the current function is invoked by a callback we can access the execution results of the
- * promises that caused the callback. This function returns the result as an account ID.
- * If the promise result is complete and successful, register 0 will be overwritten.
- *
- * - If promise result is complete and successful copies its blob into the register;
- * - If promise result is complete and failed or incomplete keeps register unused;
- *
- * @param resultIdx: The callback whose result to load
- * @returns `None` if the promise has not completed, or `Some(Ok(result))` if it has successfully, or `Some(Err(msg))` if it has failed
- */
-export let getResultAccountId = (resultIdx: Int64) => {
-  match (checkResult(resultIdx)) {
-    Some(true) => Some(Ok(Register.readRegisterAccountId(0L))),
+    Some(true) => Some(Ok(Register.readInt256(0L))),
     Some(_) => Some(Err("Promise failed")),
     None => None,
   }

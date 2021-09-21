@@ -3,7 +3,6 @@ import WasmI32 from "runtime/unsafe/wasmi32"
 import WasmI64 from "runtime/unsafe/wasmi64"
 import Conv from "runtime/unsafe/conv"
 import Native from "./internal/native"
-import AccountId from "./accountId"
 import Register from "./register"
 
 /**
@@ -16,7 +15,7 @@ import Register from "./register"
  */
 export let currentAccountId = () => {
   Native.currentAccountId(0N)
-  Register.readRegisterAccountId(0L)
+  Register.readString(0L)
 }
 
 /**
@@ -31,7 +30,7 @@ export let currentAccountId = () => {
  */
 export let signerAccountId = () => {
   Native.signerAccountId(0N)
-  Register.readRegisterAccountId(0L)
+  Register.readString(0L)
 }
 
 /**
@@ -46,7 +45,7 @@ export let signerAccountId = () => {
  */
 export let signerAccountPublicKey = () => {
   Native.signerAccountPk(0N)
-  Register.readRegisterBytes(0L)
+  Register.readBytes(0L)
 }
 
 /**
@@ -61,7 +60,7 @@ export let signerAccountPublicKey = () => {
  */
 export let predecessorAccountId = () => {
   Native.predecessorAccountId(0N)
-  Register.readRegisterAccountId(0L)
+  Register.readString(0L)
 }
 
 /**
@@ -124,18 +123,20 @@ export let storageUsage = () => {
  */
 export let inputBytes = () => {
   Native.input(0N)
-  Register.readRegisterBytes(0L)
+  Register.readBytes(0L)
 }
 
 /**
  * Reads the input to the contract call, formatted as a string.
+ * This function is "unsafe" because it does not perform any validation
+ * on the input byte sequence to ensure that it is a valid UTF-8 string.
  * This function overwrites the contents of register 0.
  *
  * @returns The input to the contract
  *
- * @example Context.inputString()
+ * @example Context.inputStringUnsafe()
  */
-export let inputString = () => {
+export let inputStringUnsafe = () => {
   Native.input(0N)
-  Register.readRegisterBytes(0L)
+  Register.readString(0L)
 }

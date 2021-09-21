@@ -1,7 +1,7 @@
 ### Validator.**stake**
 
 ```grain
-stake : AccountId.AccountId -> Bytes
+stake : String -> Bytes
 ```
 
 Get the stake of an account, if the account is currently a validator. Otherwise returns 0.
@@ -10,7 +10,7 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`accountId`|`AccountId.AccountId`|The account to look up|
+|`accountId`|`String`|The account to look up|
 
 Returns:
 

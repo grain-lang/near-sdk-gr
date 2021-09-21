@@ -1,7 +1,7 @@
 ### Context.**currentAccountId**
 
 ```grain
-currentAccountId : () -> AccountId.AccountId
+currentAccountId : () -> String
 ```
 
 Gets the account ID of the current contract that we are executing.
@@ -11,7 +11,7 @@ Returns:
 
 |type|description|
 |----|-----------|
-|`AccountId.AccountId`|The account ID|
+|`String`|The account ID|
 
 Examples:
 
@@ -22,7 +22,7 @@ Context.currentAccountId()
 ### Context.**signerAccountId**
 
 ```grain
-signerAccountId : () -> AccountId.AccountId
+signerAccountId : () -> String
 ```
 
 All contract calls are a result of some transaction that was signed by some account using
@@ -34,7 +34,7 @@ Returns:
 
 |type|description|
 |----|-----------|
-|`AccountId.AccountId`|The account ID|
+|`String`|The account ID|
 
 Examples:
 
@@ -68,7 +68,7 @@ Context.signerAccountPublicKey()
 ### Context.**predecessorAccountId**
 
 ```grain
-predecessorAccountId : () -> AccountId.AccountId
+predecessorAccountId : () -> String
 ```
 
 All contract calls are a result of a receipt, this receipt might be created by a transaction
@@ -80,7 +80,7 @@ Returns:
 
 |type|description|
 |----|-----------|
-|`AccountId.AccountId`|The account ID|
+|`String`|The account ID|
 
 Examples:
 
@@ -195,24 +195,26 @@ Examples:
 Context.inputBytes()
 ```
 
-### Context.**inputString**
+### Context.**inputStringUnsafe**
 
 ```grain
-inputString : () -> Bytes
+inputStringUnsafe : () -> String
 ```
 
 Reads the input to the contract call, formatted as a string.
+This function is "unsafe" because it does not perform any validation
+on the input byte sequence to ensure that it is a valid UTF-8 string.
 This function overwrites the contents of register 0.
 
 Returns:
 
 |type|description|
 |----|-----------|
-|`Bytes`|The input to the contract|
+|`String`|The input to the contract|
 
 Examples:
 
 ```grain
-Context.inputString()
+Context.inputStringUnsafe()
 ```
 

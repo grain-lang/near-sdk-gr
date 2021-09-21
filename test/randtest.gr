@@ -1,0 +1,5 @@
+import Random from "sys/random" 
+
+print(Random.random())
+print(Random.random())
+print(Random.random())

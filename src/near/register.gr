@@ -3,7 +3,6 @@
 import Native from "./internal/native"
 import Int128 from "./internal/int128"
 import Int256 from "./internal/int256"
-import AccountId from "./accountId"
 import WasmI32 from "runtime/unsafe/wasmi32"
 import WasmI64 from "runtime/unsafe/wasmi64"
 import Conv from "runtime/unsafe/conv"
@@ -26,9 +25,9 @@ import {
  * @param id: The register to read
  * @returns The contents of the given register
  *
- * @example Register.readRegisterString(0L)
+ * @example Register.readString(0L)
  */
-export let readRegisterString = id => {
+export let readString = id => {
   let idW = Conv.fromInt64(id)
   let valueLen = Native.registerLen(idW)
   let value = allocateString(WasmI32.wrapI64(valueLen))
@@ -45,9 +44,9 @@ export let readRegisterString = id => {
  * @param id: The register to read
  * @returns The contents of the given register
  *
- * @example Register.readRegisterBytes(0L)
+ * @example Register.readBytes(0L)
  */
-export let readRegisterBytes = id => {
+export let readBytes = id => {
   let idW = Conv.fromInt64(id)
   let valueLen = Native.registerLen(idW)
   let value = allocateBytes(WasmI32.wrapI64(valueLen))
@@ -64,9 +63,9 @@ export let readRegisterBytes = id => {
  * @param id: The register to read
  * @returns The contents of the given register
  *
- * @example Register.readRegisterInt32(0L)
+ * @example Register.readInt32(0L)
  */
-export let readRegisterInt32 = id => {
+export let readInt32 = id => {
   let idW = Conv.fromInt64(id)
   let valueLen = Native.registerLen(idW)
   assert WasmI64.eq(valueLen, 4N)
@@ -84,9 +83,9 @@ export let readRegisterInt32 = id => {
  * @param id: The register to read
  * @returns The contents of the given register
  *
- * @example Register.readRegisterInt64(0L)
+ * @example Register.readInt64(0L)
  */
-export let readRegisterInt64 = id => {
+export let readInt64 = id => {
   let idW = Conv.fromInt64(id)
   let valueLen = Native.registerLen(idW)
   assert WasmI64.eq(valueLen, 8N)
@@ -106,9 +105,9 @@ export let readRegisterInt64 = id => {
  * @param id: The register to read
  * @returns The contents of the given register
  *
- * @example Register.readRegisterInt128(0L)
+ * @example Register.readInt128(0L)
  */
-export let readRegisterInt128 = id => {
+export let readInt128 = id => {
   let idW = Conv.fromInt64(id)
   let valueLen = Native.registerLen(idW)
   assert WasmI64.eq(valueLen, 16N)
@@ -126,28 +125,13 @@ export let readRegisterInt128 = id => {
  * @param id: The register to read
  * @returns The contents of the given register
  *
- * @example Register.readRegisterInt256(0L)
+ * @example Register.readInt256(0L)
  */
-export let readRegisterInt256 = id => {
+export let readInt256 = id => {
   let idW = Conv.fromInt64(id)
   let valueLen = Native.registerLen(idW)
   assert WasmI64.eq(valueLen, 32N)
   let value = WasmI32.fromGrain(Int256.allocate())
   Native.readRegister(idW, WasmI64.extendI32U(WasmI32.add(value, 8n)))
   WasmI32.toGrain(value): (Bytes)
-}
-
-/**
- * Reads the contents of the given register, interpreting
- * the data as an address.
- *
- * Will throw an error if the given register ID is not in use.
- *
- * @param id: The register to read
- * @returns The contents of the given register
- *
- * @example Register.readRegisterAccountId(0L)
- */
-export let readRegisterAccountId = id => {
-  AccountId.fromBytes(readRegisterBytes(id))
 }

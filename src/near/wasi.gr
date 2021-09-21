@@ -1,0 +1,389 @@
+/* grainc-flags --no-gc */
+// WASI Polyfill file
+
+import WasmI32 from "runtime/unsafe/wasmi32"
+import WasmI64 from "runtime/unsafe/wasmi64"
+
+import foreign wasm log_utf8: (WasmI64, WasmI64) -> Void as log from "env"
+import foreign wasm random_seed: WasmI64 -> Void as randomSeed from "env"
+import foreign wasm read_register: (
+  WasmI64,
+  WasmI64
+) -> Void as readRegister from "env"
+import foreign wasm register_len: WasmI64 -> WasmI64 as registerLen from "env"
+
+// clocks
+export let _CLOCK_REALTIME = 0n
+export let _CLOCK_MONOTONIC = 1n
+export let _CLOCK_PROCESS_CPUTIME = 2n
+export let _CLOCK_THREAD_CPUTIME = 3n
+
+// time
+
+export let _TIME_SET_ATIM = 1n
+export let _TIME_SET_ATIM_NOW = 2n
+export let _TIME_SET_MTIM = 4n
+export let _TIME_SET_MTIM_NOW = 8n
+
+// lookup flags
+export let _LOOKUP_FLAG_SYMLINK_FOLLOW = 1n
+
+// open flags
+export let _OPEN_FLAG_CREAT = 1n
+export let _OPEN_FLAG_DIRECTORY = 2n
+export let _OPEN_FLAG_EXCL = 4n
+export let _OPEN_FLAG_TRUNC = 8n
+
+// fdflags
+export let _FDFLAG_APPEND = 1n
+export let _FDFLAG_DSYNC = 2n
+export let _FDFLAG_NONBLOCK = 4n
+export let _FDFLAG_RSYNC = 8n
+export let _FDFLAG_SYNC = 16n
+
+// whence
+export let _WHENCE_SET = 0n
+export let _WHENCE_CUR = 1n
+export let _WHENCE_END = 2n
+
+// error codes
+export let _ESUCCESS = 0n
+export let _ETOOBIG = 1n
+export let _EACCES = 2n
+export let _EADDRINUSE = 3n
+export let _EADDRNOTAVAIL = 4n
+export let _EAFNOSUPPORT = 5n
+export let _EAGAIN = 6n
+export let _EALREADY = 7n
+export let _EBADF = 8n
+export let _EBADMSG = 9n
+export let _EBUSY = 10n
+export let _ECANCELED = 11n
+export let _ECHILD = 12n
+export let _ECONNABORTED = 13n
+export let _ECONNREFUSED = 14n
+export let _ECONNRESET = 15n
+export let _EDEADLK = 16n
+export let _EDESTADDRREQ = 17n
+export let _EDOM = 18n
+export let _EDQUOT = 19n
+export let _EEXIST = 20n
+export let _EFAULT = 21n
+export let _EFBIG = 22n
+export let _EHOSTUNREACH = 23n
+export let _EIDRM = 24n
+export let _EILSEQ = 25n
+export let _EINPROGRESS = 26n
+export let _EINTR = 27n
+export let _EINVAL = 28n
+export let _EIO = 29n
+export let _EISCONN = 30n
+export let _EISDIR = 31n
+export let _ELOOP = 32n
+export let _EMFILE = 33n
+export let _EMLINK = 34n
+export let _EMSGSIZE = 35n
+export let _EMULTIHOP = 36n
+export let _ENAMETOOLONG = 37n
+export let _ENETDOWN = 38n
+export let _ENETRESET = 39n
+export let _ENETUNREACH = 40n
+export let _ENFILE = 41n
+export let _ENOBUFS = 42n
+export let _ENODEV = 43n
+export let _ENOENT = 44n
+export let _ENOEXEC = 45n
+export let _ENOLCK = 46n
+export let _ENOLINK = 47n
+export let _ENOMEM = 48n
+export let _ENOMSG = 49n
+export let _ENOPROTOOPT = 50n
+export let _ENOSPC = 51n
+export let _ENOSYS = 52n
+export let _ENOTCONN = 53n
+export let _ENOTDIR = 54n
+export let _ENOTEMPTY = 55n
+export let _ENOTRECOVERABLE = 56n
+export let _ENOTSOCK = 57n
+export let _ENOTSUP = 58n
+export let _ENOTTY = 59n
+export let _ENXIO = 60n
+export let _EOVERFLOW = 61n
+export let _EOWNERDEAD = 62n
+export let _EPERM = 63n
+export let _EPIPE = 64n
+export let _EPROTO = 65n
+export let _EPROTONOSUPPORT = 66n
+export let _EPROTOTYPE = 67n
+export let _ERANGE = 68n
+export let _EROFS = 69n
+export let _ESPIPE = 70n
+export let _ESRCH = 71n
+export let _ESTALE = 72n
+export let _ETIMEDOUT = 73n
+export let _ETXTBSY = 74n
+export let _EXDEV = 75n
+export let _ENOTCAPABLE = 76n
+
+export let fd_write: (WasmI32, WasmI32, WasmI32, WasmI32) -> WasmI32 =
+  (
+    fd,
+    iovs,
+    iovs_len,
+    nwritten,
+  ) => {
+  if (WasmI32.eqz(fd)) {
+    let mut written = 0n
+    let mut iovs_offset = 0n
+    for (let mut i = 0n; WasmI32.ltU(i, iovs_len); i = WasmI32.add(i, 1n)) {
+      let iovs = WasmI32.add(iovs, iovs_offset)
+      let ptr = WasmI32.load(iovs, 0n)
+      let size = WasmI32.load(iovs, 4n)
+      log(WasmI64.extendI32U(size), WasmI64.extendI32U(ptr))
+      written = WasmI32.add(written, size)
+      iovs_offset = WasmI32.add(iovs_offset, 8n)
+    }
+    WasmI32.store(nwritten, written, 0n)
+    0n
+  } else {
+    _ENOTCAPABLE
+  }
+}
+
+let mut seedSet = false
+let mut seed = 0L
+let mut ctr = 0L
+let mut tmp = 0L // can't call malloc here, so we read memory into this
+
+let initSeed = () => {
+  if (seedSet) {
+    0n
+  } else {
+    randomSeed(0N)
+    let len = registerLen(0N)
+    if (WasmI64.gtU(len, 4N)) {
+      // we can't partially read in the register, so choke if the seed is > 4 bytes
+      _ENOTCAPABLE
+    } else {
+      // read 0-4 bytes into buf
+      readRegister(
+        0N,
+        WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(tmp), 8n)),
+      )
+      seed = WasmI64.load(WasmI32.fromGrain(tmp), 8n)
+      seedSet = true
+      0n
+    }
+  }
+}
+
+// https://arxiv.org/pdf/2004.06278v3.pdf
+let squares = (ctr: WasmI64, key: WasmI64) => {
+  let mut x = WasmI64.mul(ctr, key)
+  let mut y = x
+  let mut z = WasmI64.add(y, key)
+  // round 1
+  x = WasmI64.add(WasmI64.mul(x, x), y)
+  x = WasmI64.or(WasmI64.shrU(x, 32N), WasmI64.shl(x, 32N))
+  // round 2
+  x = WasmI64.add(WasmI64.mul(x, x), y)
+  x = WasmI64.or(WasmI64.shrU(x, 32N), WasmI64.shl(x, 32N))
+  // round 3
+  x = WasmI64.add(WasmI64.mul(x, x), y)
+  x = WasmI64.or(WasmI64.shrU(x, 32N), WasmI64.shl(x, 32N))
+  // round 4
+  x = WasmI64.add(WasmI64.mul(x, x), y)
+  x = WasmI64.or(WasmI64.shrU(x, 32N), WasmI64.shl(x, 32N))
+  WasmI32.wrapI64(WasmI64.shrU(WasmI64.add(WasmI64.mul(x, x), z), 32N))
+}
+
+let nextRand = () => {
+  // PRECONDITION: Seed is set
+  let ctrVal = WasmI64.load(WasmI32.fromGrain(ctr), 8n)
+  let seedVal = WasmI64.load(WasmI32.fromGrain(seed), 8n)
+  let squares = squares(ctrVal, seedVal)
+  WasmI32.store(WasmI32.fromGrain(tmp), squares, 8n)
+  WasmI64.store(WasmI32.fromGrain(ctr), WasmI64.add(ctrVal, 1N), 8n)
+  void
+}
+
+primitive (&&) : (Bool, Bool) -> Bool = "@and"
+
+export let random_get = (buf: WasmI32, bufLen: WasmI32) => {
+  let res = initSeed()
+  if (WasmI32.eqz(res)) {
+    // seed is valid. generate the random data
+    let mut remaining = bufLen
+    let mut i = 0n
+    while (WasmI32.gtU(remaining, 0n)) {
+      nextRand()
+      let mut nextRemaining = 2n
+      let nextI = 0n
+      while ((WasmI32.gtU(remaining, 0n)) && (WasmI32.gtU(nextRemaining, 0n))) {
+        WasmI32.store8(
+          WasmI32.add(buf, i),
+          WasmI32.load8U(WasmI32.add(buf, nextI), 8n),
+          0n,
+        )
+        i = WasmI32.add(i, 1n)
+        nextRemaining = WasmI32.sub(nextRemaining, 1n)
+        remaining = WasmI32.sub(remaining, 1n)
+      }
+    }
+    _ESUCCESS
+  } else {
+    _ENOTCAPABLE
+  }
+}
+
+// stubs
+
+// env
+export let args_get = (_: WasmI32, _: WasmI32) => _ENOTCAPABLE
+export let args_sizes_get = (_: WasmI32, _: WasmI32) => _ENOTCAPABLE
+export let environ_get = (_: WasmI32, _: WasmI32) => _ENOTCAPABLE
+export let environ_sizes_get = (_: WasmI32, _: WasmI32) => _ENOTCAPABLE
+
+// proc
+export let proc_exit = (_: WasmI32) => void
+export let proc_raise = (_: WasmI32) => _ENOTCAPABLE
+export let sched_yield = () => _ENOTCAPABLE
+
+// random
+// random_get above
+
+// time
+export let clock_time_get = (_: WasmI32, _: WasmI64, _: WasmI32) => _ENOTCAPABLE
+
+// file
+export let path_open =
+  (
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI64,
+    _: WasmI64,
+    _: WasmI32,
+    _: WasmI32,
+  ) =>
+  0n
+export let fd_read = (_: WasmI32, _: WasmI32, _: WasmI32, _: WasmI32) =>
+  _ENOTCAPABLE
+export let fd_pread =
+  (
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI64,
+    _: WasmI32,
+  ) =>
+  0n
+// fd_write above
+export let fd_pwrite =
+  (
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI64,
+    _: WasmI32,
+  ) =>
+  0n
+export let fd_allocate = (_: WasmI32, _: WasmI64, _: WasmI64) => _ENOTCAPABLE
+export let fd_close = (_: WasmI32) => _ENOTCAPABLE
+export let fd_datasync = (_: WasmI32) => _ENOTCAPABLE
+export let fd_sync = (_: WasmI32) => _ENOTCAPABLE
+export let fd_fdstat_get = (_: WasmI32, _: WasmI32) => _ENOTCAPABLE
+export let fd_fdstat_set_flags = (_: WasmI32, _: WasmI32) => _ENOTCAPABLE
+export let fd_fdstat_set_rights = (_: WasmI32, _: WasmI64, _: WasmI64) =>
+  _ENOTCAPABLE
+export let fd_filestat_get = (_: WasmI32, _: WasmI32) => _ENOTCAPABLE
+export let fd_filestat_set_size = (_: WasmI32, _: WasmI64) => _ENOTCAPABLE
+export let fd_filestat_set_times =
+  (
+    _: WasmI32,
+    _: WasmI64,
+    _: WasmI64,
+    _: WasmI32,
+  ) =>
+  0n
+export let fd_readdir =
+  (
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI64,
+    _: WasmI32,
+  ) =>
+  0n
+export let fd_renumber = (_: WasmI32, _: WasmI32) => _ENOTCAPABLE
+export let fd_seek = (_: WasmI32, _: WasmI64, _: WasmI32, _: WasmI32) =>
+  _ENOTCAPABLE
+export let fd_tell = (_: WasmI32, _: WasmI32) => _ENOTCAPABLE
+export let path_create_directory = (_: WasmI32, _: WasmI32, _: WasmI32) =>
+  _ENOTCAPABLE
+export let path_filestat_get =
+  (
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI32,
+  ) =>
+  0n
+export let path_filestat_set_times =
+  (
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI64,
+    _: WasmI64,
+    _: WasmI32,
+  ) =>
+  0n
+export let path_link =
+  (
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI32,
+  ) =>
+  0n
+export let path_symlink =
+  (
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI32,
+  ) =>
+  0n
+export let path_unlink_file = (_: WasmI32, _: WasmI32, _: WasmI32) =>
+  _ENOTCAPABLE
+export let path_readlink =
+  (
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI32,
+  ) =>
+  0n
+export let path_remove_directory = (_: WasmI32, _: WasmI32, _: WasmI32) =>
+  _ENOTCAPABLE
+export let path_rename =
+  (
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI32,
+    _: WasmI32,
+  ) =>
+  0n

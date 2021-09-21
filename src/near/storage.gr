@@ -3,47 +3,16 @@
 import WasmI32 from "runtime/unsafe/wasmi32"
 import WasmI64 from "runtime/unsafe/wasmi64"
 import Native from "./internal/native"
-import AccountId from "./accountId"
 import Register from "./register"
 
 // [TODO] update types of int128/int256 versions of all functions, once support is added
 
-/**
- * The different types of storage keys available
- */
-export enum StorageKey {
-  /**
-   * Storage key based on String data
-   */
-  StringKey(String),
-  /**
-   * Storage key based on Bytes data
-   */
-  BytesKey(Bytes),
-  /**
-   * Storage key based on AccountIdes
-   */
-  AccountIdKey(AccountId.AccountId),
+let keyPtr = (s: String) => {
+  WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(s), 8n))
 }
 
-let keyPtr = k => {
-  match (k) {
-    StringKey(s) => WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(s), 8n)),
-    BytesKey(b) => WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(b), 8n)),
-    AccountIdKey(a) =>
-      WasmI64.extendI32U(
-        WasmI32.add(WasmI32.fromGrain(AccountId.toBytes(a)), 8n),
-      ),
-  }
-}
-
-let keyLen = k => {
-  match (k) {
-    StringKey(s) => WasmI64.load32U(WasmI32.fromGrain(s), 4n),
-    BytesKey(b) => WasmI64.load32U(WasmI32.fromGrain(b), 4n),
-    AccountIdKey(a) =>
-      WasmI64.load32U(WasmI32.fromGrain(AccountId.toBytes(a)), 4n),
-  }
+let keyLen = (s: String) => {
+  WasmI64.load32U(WasmI32.fromGrain(s), 4n)
 }
 
 /**
@@ -54,7 +23,7 @@ let keyLen = k => {
  *
  * @example Storage.hasKey(Storage.StringKey("foo"))
  */
-export let hasKey = (key: StorageKey) => {
+export let hasKey = (key: String) => {
   WasmI64.eq(Native.storageHasKey(keyLen(key), keyPtr(key)), 1N)
 }
 
@@ -68,12 +37,12 @@ export let hasKey = (key: StorageKey) => {
  *
  * @example Storage.getString(Storage.StringKey("foo"))
  */
-export let getString = (key: StorageKey) => {
+export let getString = (key: String) => {
   let res = Native.storageRead(keyLen(key), keyPtr(key), 0N)
   if (WasmI64.eqz(res)) {
     None
   } else {
-    Some(Register.readRegisterString(0L))
+    Some(Register.readString(0L))
   }
 }
 
@@ -87,12 +56,12 @@ export let getString = (key: StorageKey) => {
  *
  * @example Storage.getBytes(Storage.StringKey("foo"))
  */
-export let getBytes = (key: StorageKey) => {
+export let getBytes = (key: String) => {
   let res = Native.storageRead(keyLen(key), keyPtr(key), 0N)
   if (WasmI64.eqz(res)) {
     None
   } else {
-    Some(Register.readRegisterBytes(0L))
+    Some(Register.readBytes(0L))
   }
 }
 
@@ -106,12 +75,12 @@ export let getBytes = (key: StorageKey) => {
  *
  * @example Storage.getInt32(Storage.StringKey("foo"))
  */
-export let getInt32 = (key: StorageKey) => {
+export let getInt32 = (key: String) => {
   let res = Native.storageRead(keyLen(key), keyPtr(key), 0N)
   if (WasmI64.eqz(res)) {
     None
   } else {
-    Some(Register.readRegisterInt32(0L))
+    Some(Register.readInt32(0L))
   }
 }
 
@@ -125,12 +94,12 @@ export let getInt32 = (key: StorageKey) => {
  *
  * @example Storage.getInt64(Storage.StringKey("foo"))
  */
-export let getInt64 = (key: StorageKey) => {
+export let getInt64 = (key: String) => {
   let res = Native.storageRead(keyLen(key), keyPtr(key), 0N)
   if (WasmI64.eqz(res)) {
     None
   } else {
-    Some(Register.readRegisterInt64(0L))
+    Some(Register.readInt64(0L))
   }
 }
 
@@ -144,12 +113,12 @@ export let getInt64 = (key: StorageKey) => {
  *
  * @example Storage.getInt128(Storage.StringKey("foo"))
  */
-export let getInt128 = (key: StorageKey) => {
+export let getInt128 = (key: String) => {
   let res = Native.storageRead(keyLen(key), keyPtr(key), 0N)
   if (WasmI64.eqz(res)) {
     None
   } else {
-    Some(Register.readRegisterInt128(0L))
+    Some(Register.readInt128(0L))
   }
 }
 
@@ -163,12 +132,12 @@ export let getInt128 = (key: StorageKey) => {
  *
  * @example Storage.getInt256(Storage.StringKey("foo"))
  */
-export let getInt256 = (key: StorageKey) => {
+export let getInt256 = (key: String) => {
   let res = Native.storageRead(keyLen(key), keyPtr(key), 0N)
   if (WasmI64.eqz(res)) {
     None
   } else {
-    Some(Register.readRegisterInt256(0L))
+    Some(Register.readInt256(0L))
   }
 }
 
@@ -189,9 +158,10 @@ let setStringLike = (key, value) => {
  *
  * @example Storage.setString(Storage.StringKey("foo"), "bar")
  */
-export let setString = (key: StorageKey, value: String) => {
+export let setString = (key: String, value: String) => {
   let value = WasmI32.fromGrain(value)
-  WasmI64.eq(setStringLike(key, value), 1N)
+  setStringLike(key, value)
+  void
 }
 
 /**
@@ -205,9 +175,10 @@ export let setString = (key: StorageKey, value: String) => {
  *
  * @example Storage.setBytes(Storage.StringKey("foo"), Bytes.fromString("bar"))
  */
-export let setBytes = (key: StorageKey, value: Bytes) => {
+export let setBytes = (key: String, value: Bytes) => {
   let value = WasmI32.fromGrain(value)
-  WasmI64.eq(setStringLike(key, value), 1N)
+  setStringLike(key, value)
+  void
 }
 
 let setFixnum = (key, value, width) => {
@@ -227,9 +198,10 @@ let setFixnum = (key, value, width) => {
  *
  * @example Storage.setInt32(Storage.StringKey("foo"), 42l)
  */
-export let setInt32 = (key: StorageKey, value: Int32) => {
+export let setInt32 = (key: String, value: Int32) => {
   let value = WasmI32.fromGrain(value)
-  WasmI64.eq(setFixnum(key, value, 4N), 1N)
+  setFixnum(key, value, 4N)
+  void
 }
 
 /**
@@ -243,9 +215,10 @@ export let setInt32 = (key: StorageKey, value: Int32) => {
  *
  * @example Storage.setInt64(Storage.StringKey("foo"), 42L)
  */
-export let setInt64 = (key: StorageKey, value: Int64) => {
+export let setInt64 = (key: String, value: Int64) => {
   let value = WasmI32.fromGrain(value)
-  WasmI64.eq(setFixnum(key, value, 4N), 8N)
+  setFixnum(key, value, 8N)
+  void
 }
 
 /**
@@ -259,7 +232,7 @@ export let setInt64 = (key: StorageKey, value: Int64) => {
  *
  * @example Storage.setInt128(Storage.StringKey("foo"), Int128.fromInt64(5L))
  */
-export let setInt128 = (key: StorageKey, value: Bytes) => {
+export let setInt128 = (key: String, value: Bytes) => {
   setBytes(key, value)
 }
 
@@ -274,7 +247,7 @@ export let setInt128 = (key: StorageKey, value: Bytes) => {
  *
  * @example Storage.setInt256(Storage.StringKey("foo"), Int256.fromInt64(5L))
  */
-export let setInt256 = (key: StorageKey, value: Bytes) => {
+export let setInt256 = (key: String, value: Bytes) => {
   setBytes(key, value)
 }
 
@@ -288,13 +261,13 @@ export let setInt256 = (key: StorageKey, value: Bytes) => {
  * @param value: The value to store
  * @returns The existing string data associated with `key`, if any
  *
- * @example Storage.swapString(Storage.StringKey("foo"), "bar")
+ * @example Storage.replaceString(Storage.StringKey("foo"), "bar")
  */
-export let swapString = (key: StorageKey, value: String) => {
-  if (setString(key, value)) {
-    Some(Register.readRegisterString(0L))
-  } else {
+export let replaceString = (key: String, value: String) => {
+  if (WasmI64.eqz(setStringLike(key, WasmI32.fromGrain(value)))) {
     None
+  } else {
+    Some(Register.readString(0L))
   }
 }
 
@@ -308,13 +281,13 @@ export let swapString = (key: StorageKey, value: String) => {
  * @param value: The value to store
  * @returns The existing byte data associated with `key`, if any
  *
- * @example Storage.swapBytes(Storage.StringKey("foo"), Bytes.fromString("bar"))
+ * @example Storage.replaceBytes(Storage.StringKey("foo"), Bytes.fromString("bar"))
  */
-export let swapBytes = (key: StorageKey, value: Bytes) => {
-  if (setBytes(key, value)) {
-    Some(Register.readRegisterBytes(0L))
-  } else {
+export let replaceBytes = (key: String, value: Bytes) => {
+  if (WasmI64.eqz(setStringLike(key, WasmI32.fromGrain(value)))) {
     None
+  } else {
+    Some(Register.readBytes(0L))
   }
 }
 
@@ -328,13 +301,13 @@ export let swapBytes = (key: StorageKey, value: Bytes) => {
  * @param value: The value to store
  * @returns The existing int32 data associated with `key`, if any
  *
- * @example Storage.swapInt32(Storage.StringKey("foo"), 42l)
+ * @example Storage.replaceInt32(Storage.StringKey("foo"), 42l)
  */
-export let swapInt32 = (key: StorageKey, value: Int32) => {
-  if (setInt32(key, value)) {
-    Some(Register.readRegisterInt32(0L))
-  } else {
+export let replaceInt32 = (key: String, value: Int32) => {
+  if (WasmI64.eqz(setFixnum(key, WasmI32.fromGrain(value), 4N))) {
     None
+  } else {
+    Some(Register.readInt32(0L))
   }
 }
 
@@ -350,11 +323,11 @@ export let swapInt32 = (key: StorageKey, value: Int32) => {
  *
  * @example Storage.setInt64(Storage.StringKey("foo"), 42L)
  */
-export let swapInt64 = (key: StorageKey, value: Int64) => {
-  if (setInt64(key, value)) {
-    Some(Register.readRegisterInt64(0L))
-  } else {
+export let replaceInt64 = (key: String, value: Int64) => {
+  if (WasmI64.eqz(setFixnum(key, WasmI32.fromGrain(value), 8N))) {
     None
+  } else {
+    Some(Register.readInt64(0L))
   }
 }
 
@@ -370,11 +343,11 @@ export let swapInt64 = (key: StorageKey, value: Int64) => {
  *
  * @example Storage.setInt128(Storage.StringKey("foo"), Int128.fromInt64(5L))
  */
-export let swapInt128 = (key: StorageKey, value: Bytes) => {
-  if (setInt128(key, value)) {
-    Some(Register.readRegisterInt128(0L))
-  } else {
+export let replaceInt128 = (key: String, value: Bytes) => {
+  if (WasmI64.eqz(setStringLike(key, WasmI32.fromGrain(value)))) {
     None
+  } else {
+    Some(Register.readInt128(0L))
   }
 }
 
@@ -390,11 +363,11 @@ export let swapInt128 = (key: StorageKey, value: Bytes) => {
  *
  * @example Storage.setInt256(Storage.StringKey("foo"), Int256.fromInt64(5L))
  */
-export let swapInt256 = (key: StorageKey, value: Bytes) => {
-  if (setInt256(key, value)) {
-    Some(Register.readRegisterInt256(0L))
-  } else {
+export let replaceInt256 = (key: String, value: Bytes) => {
+  if (WasmI64.eqz(setStringLike(key, WasmI32.fromGrain(value)))) {
     None
+  } else {
+    Some(Register.readInt256(0L))
   }
 }
 
@@ -407,14 +380,14 @@ export let swapInt256 = (key: StorageKey, value: Bytes) => {
  * @param key: The key to remove
  * @returns The string value which was removed from storage
  *
- * @example Storage.removeString(Storage.StringKey("foo"))
+ * @example Storage.popString(Storage.StringKey("foo"))
  */
-export let removeString = (key: StorageKey) => {
+export let popString = (key: String) => {
   let res = Native.storageRemove(keyLen(key), keyPtr(key), 0N)
   if (WasmI64.eqz(res)) {
     None
   } else {
-    Some(Register.readRegisterString(0L))
+    Some(Register.readString(0L))
   }
 }
 
@@ -427,14 +400,14 @@ export let removeString = (key: StorageKey) => {
  * @param key: The key to remove
  * @returns The bytes value which was removed from storage
  *
- * @example Storage.removeBytes(Storage.StringKey("foo"))
+ * @example Storage.popBytes(Storage.StringKey("foo"))
  */
-export let removeBytes = (key: StorageKey) => {
+export let popBytes = (key: String) => {
   let res = Native.storageRemove(keyLen(key), keyPtr(key), 0N)
   if (WasmI64.eqz(res)) {
     None
   } else {
-    Some(Register.readRegisterBytes(0L))
+    Some(Register.readBytes(0L))
   }
 }
 
@@ -447,14 +420,14 @@ export let removeBytes = (key: StorageKey) => {
  * @param key: The key to remove
  * @returns The int32 value which was removed from storage
  *
- * @example Storage.removeInt32(Storage.StringKey("foo"))
+ * @example Storage.popInt32(Storage.StringKey("foo"))
  */
-export let removeInt32 = (key: StorageKey) => {
+export let popInt32 = (key: String) => {
   let res = Native.storageRemove(keyLen(key), keyPtr(key), 0N)
   if (WasmI64.eqz(res)) {
     None
   } else {
-    Some(Register.readRegisterInt32(0L))
+    Some(Register.readInt32(0L))
   }
 }
 
@@ -467,14 +440,14 @@ export let removeInt32 = (key: StorageKey) => {
  * @param key: The key to remove
  * @returns The string value which was removed from storage
  *
- * @example Storage.removeInt64(Storage.StringKey("foo"))
+ * @example Storage.popInt64(Storage.StringKey("foo"))
  */
-export let removeInt64 = (key: StorageKey) => {
+export let popInt64 = (key: String) => {
   let res = Native.storageRemove(keyLen(key), keyPtr(key), 0N)
   if (WasmI64.eqz(res)) {
     None
   } else {
-    Some(Register.readRegisterInt64(0L))
+    Some(Register.readInt64(0L))
   }
 }
 
@@ -487,14 +460,14 @@ export let removeInt64 = (key: StorageKey) => {
  * @param key: The key to remove
  * @returns The string value which was removed from storage
  *
- * @example Storage.removeInt128(Storage.StringKey("foo"))
+ * @example Storage.popInt128(Storage.StringKey("foo"))
  */
-export let removeInt128 = (key: StorageKey) => {
+export let popInt128 = (key: String) => {
   let res = Native.storageRemove(keyLen(key), keyPtr(key), 0N)
   if (WasmI64.eqz(res)) {
     None
   } else {
-    Some(Register.readRegisterInt128(0L))
+    Some(Register.readInt128(0L))
   }
 }
 
@@ -507,14 +480,14 @@ export let removeInt128 = (key: StorageKey) => {
  * @param key: The key to remove
  * @returns The string value which was removed from storage
  *
- * @example Storage.removeInt256(Storage.StringKey("foo"))
+ * @example Storage.popInt256(Storage.StringKey("foo"))
  */
-export let removeInt256 = (key: StorageKey) => {
+export let popInt256 = (key: String) => {
   let res = Native.storageRemove(keyLen(key), keyPtr(key), 0N)
   if (WasmI64.eqz(res)) {
     None
   } else {
-    Some(Register.readRegisterInt256(0L))
+    Some(Register.readInt256(0L))
   }
 }
 
@@ -528,7 +501,7 @@ export let removeInt256 = (key: StorageKey) => {
  *
  * @example Storage.remove(Storage.StringKey("foo"))
  */
-export let remove = (key: StorageKey) => {
-  let res = Native.storageRemove(keyLen(key), keyPtr(key), 0N)
-  WasmI64.eq(res, 1N)
+export let remove = (key: String) => {
+  Native.storageRemove(keyLen(key), keyPtr(key), 0N)
+  void
 }

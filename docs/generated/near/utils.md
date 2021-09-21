@@ -15,7 +15,7 @@ Parameters:
 Examples:
 
 ```grain
-Utils.valueReturnString("something important")
+Utils.valueReturnBytes(Bytes.fromString("something important"))
 ```
 
 ### Utils.**valueReturnString**

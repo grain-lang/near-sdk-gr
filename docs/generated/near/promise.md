@@ -105,7 +105,7 @@ Parameters:
 ```grain
 record FunctionCallPermission {
   allowance: Option<Bytes>,
-  receiverId: AccountId.AccountId,
+  receiverId: String,
   methodNames: Array<String>,
 }
 ```
@@ -198,7 +198,7 @@ Parameters:
 ### Promise.**batchActionDeleteAccount**
 
 ```grain
-batchActionDeleteAccount : (Promise, AccountId.AccountId) -> Void
+batchActionDeleteAccount : (Promise, String) -> Void
 ```
 
 Appends a `DeleteAccount` action to the batch of actions for the given promise.
@@ -213,7 +213,7 @@ Parameters:
 |param|type|description|
 |-----|----|-----------|
 |`promise`|`Promise`|The promise to append the action to|
-|`publicKey`|`AccountId.AccountId`|The account ID to transfer the remaining balance to|
+|`publicKey`|`String`|The account ID to transfer the remaining balance to|
 
 ## Promise Results
 
@@ -409,29 +409,4 @@ Returns:
 |type|description|
 |----|-----------|
 |`Option<Result<Bytes, String>>`|`None` if the promise has not completed, or `Some(Ok(result))` if it has successfully, or `Some(Err(msg))` if it has failed|
-
-### Promise.**getResultAccountId**
-
-```grain
-getResultAccountId : Int64 -> Option<Result<AccountId.AccountId, String>>
-```
-
-If the current function is invoked by a callback we can access the execution results of the
-promises that caused the callback. This function returns the result as an account ID.
-If the promise result is complete and successful, register 0 will be overwritten.
-
-- If promise result is complete and successful copies its blob into the register;
-- If promise result is complete and failed or incomplete keeps register unused;
-
-Parameters:
-
-|param|type|description|
-|-----|----|-----------|
-|`resultIdx`|`Int64`|The callback whose result to load|
-
-Returns:
-
-|type|description|
-|----|-----------|
-|`Option<Result<AccountId.AccountId, String>>`|`None` if the promise has not completed, or `Some(Ok(result))` if it has successfully, or `Some(Err(msg))` if it has failed|
 

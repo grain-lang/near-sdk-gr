@@ -1,7 +1,7 @@
-### Register.**readRegisterString**
+### Register.**readString**
 
 ```grain
-readRegisterString : Int64 -> String
+readString : Int64 -> String
 ```
 
 Reads the contents of the given register, interpreting
@@ -24,13 +24,13 @@ Returns:
 Examples:
 
 ```grain
-Register.readRegisterString(0L)
+Register.readString(0L)
 ```
 
-### Register.**readRegisterBytes**
+### Register.**readBytes**
 
 ```grain
-readRegisterBytes : Int64 -> Bytes
+readBytes : Int64 -> Bytes
 ```
 
 Reads the contents of the given register, interpreting
@@ -53,13 +53,13 @@ Returns:
 Examples:
 
 ```grain
-Register.readRegisterBytes(0L)
+Register.readBytes(0L)
 ```
 
-### Register.**readRegisterInt32**
+### Register.**readInt32**
 
 ```grain
-readRegisterInt32 : Int64 -> Int32
+readInt32 : Int64 -> Int32
 ```
 
 Reads the contents of the given register, interpreting
@@ -82,13 +82,13 @@ Returns:
 Examples:
 
 ```grain
-Register.readRegisterInt32(0L)
+Register.readInt32(0L)
 ```
 
-### Register.**readRegisterInt64**
+### Register.**readInt64**
 
 ```grain
-readRegisterInt64 : Int64 -> Int64
+readInt64 : Int64 -> Int64
 ```
 
 Reads the contents of the given register, interpreting
@@ -111,13 +111,13 @@ Returns:
 Examples:
 
 ```grain
-Register.readRegisterInt64(0L)
+Register.readInt64(0L)
 ```
 
-### Register.**readRegisterInt128**
+### Register.**readInt128**
 
 ```grain
-readRegisterInt128 : Int64 -> Bytes
+readInt128 : Int64 -> Bytes
 ```
 
 Reads the contents of the given register, interpreting
@@ -140,13 +140,13 @@ Returns:
 Examples:
 
 ```grain
-Register.readRegisterInt128(0L)
+Register.readInt128(0L)
 ```
 
-### Register.**readRegisterInt256**
+### Register.**readInt256**
 
 ```grain
-readRegisterInt256 : Int64 -> Bytes
+readInt256 : Int64 -> Bytes
 ```
 
 Reads the contents of the given register, interpreting
@@ -169,35 +169,6 @@ Returns:
 Examples:
 
 ```grain
-Register.readRegisterInt256(0L)
-```
-
-### Register.**readRegisterAccountId**
-
-```grain
-readRegisterAccountId : Int64 -> AccountId.AccountId
-```
-
-Reads the contents of the given register, interpreting
-the data as an address.
-
-Will throw an error if the given register ID is not in use.
-
-Parameters:
-
-|param|type|description|
-|-----|----|-----------|
-|`id`|`Int64`|The register to read|
-
-Returns:
-
-|type|description|
-|----|-----------|
-|`AccountId.AccountId`|The contents of the given register|
-
-Examples:
-
-```grain
-Register.readRegisterAccountId(0L)
+Register.readInt256(0L)
 ```
 

@@ -1,7 +1,14 @@
 /* grainc-flags --no-gc */
 // Workaround until int128 (fixnum) support is added to Grain
+import Int32 from "int32"
 import Int64 from "int64"
+import Number from "number"
 import Bytes from "bytes"
+import WasmI32 from "runtime/unsafe/wasmi32"
+import WasmI64 from "runtime/unsafe/wasmi64"
+import Conv from "runtime/unsafe/conv"
+import Tags from "runtime/unsafe/tags"
+import Memory from "runtime/unsafe/memory"
 
 type Int128 = Bytes
 
@@ -18,6 +25,56 @@ export let fromInt64 = n => {
   let ret = allocate()
   Bytes.setInt64(0, n, ret)
   ret: Int128
+}
+
+@unsafe
+export let toNumber = (n: Int128) => {
+  let limb0 = Bytes.getInt64(0, n)
+  let limb1 = Bytes.getInt64(8, n)
+  let limbs = if (limb1 != 0L) 2 else if (limb0 != 0L) 1 else 0
+  if (limbs == 0) {
+    0
+  } else {
+    let len = Conv.fromInt32(Int32.fromNumber(limbs * 8 + 16))
+    let ptr = Memory.malloc(len)
+    Memory.fill(ptr, 0n, len)
+    WasmI32.store(ptr, Tags._GRAIN_BOXED_NUM_HEAP_TAG, 0n)
+    WasmI32.store(ptr, Tags._GRAIN_BIGINT_BOXED_NUM_TAG, 4n)
+    WasmI32.store(ptr, Conv.fromInt32(Int32.fromNumber(limbs)), 8n)
+    WasmI32.store(ptr, 0n, 12n)
+    if (limb0 != 0L) {
+      WasmI64.store(ptr, Conv.fromInt64(limb0), 16n)
+    }
+    if (limb1 != 0L) {
+      WasmI64.store(ptr, Conv.fromInt64(limb1), 24n)
+    }
+    WasmI32.toGrain(ptr)
+  }
+}
+
+@unsafe
+export let fromNumber = n => {
+  if (Number.abs(n) <= 0x7FFFFFFFFFFFFFFF) {
+    fromInt64(Int64.fromNumber(n))
+  } else {
+    // bigint
+    assert Conv.toInt32(WasmI32.load(WasmI32.fromGrain(n), 0n)) ==
+    Conv.toInt32(Tags._GRAIN_BOXED_NUM_HEAP_TAG)
+    assert Conv.toInt32(WasmI32.load(WasmI32.fromGrain(n), 4n)) ==
+    Conv.toInt32(Tags._GRAIN_BIGINT_BOXED_NUM_TAG)
+    let nLimbs = Int32.toNumber(
+      Conv.toInt32(WasmI32.load(WasmI32.fromGrain(n), 8n))
+    )
+    if (nLimbs > 2) {
+      fail "Int128 overflow"
+    }
+    let limb0 = Conv.toInt64(WasmI64.load(WasmI32.fromGrain(n), 16n))
+    let limb1 = Conv.toInt64(WasmI64.load(WasmI32.fromGrain(n), 24n))
+    let ret = allocate()
+    Bytes.setInt64(0, limb0, ret)
+    Bytes.setInt64(8, limb1, ret)
+    ret: Int128
+  }
 }
 
 export let lt = (a: Int128, b: Int128) => {

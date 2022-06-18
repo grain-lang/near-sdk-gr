@@ -5,9 +5,8 @@ const test = anyTest;
 
 test.beforeEach(async t => {
   const {worker, root, contract} = await setupWorker(t, "contextTests.gr.wasm");
-  const subacct = await root.createSubAccount('subacct');
   t.context.worker = worker;
-  t.context.accounts = {root, contract, subacct};
+  t.context.accounts = {root, contract};
 })
 
 test.afterEach(teardownWorker)

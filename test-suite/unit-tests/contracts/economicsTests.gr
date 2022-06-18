@@ -1,0 +1,28 @@
+import Economics from "near/economics"
+import Int128 from "near/internal/int128"
+import Utils from "near/utils"
+import Bytes from "bytes"
+
+export let doAccountBalance = () => {
+  Utils.valueReturnString(toString(Int128.toNumber(Economics.accountBalance())))
+}
+
+export let doAccountLockedBalance = () => {
+  Utils.valueReturnString(
+    toString(Int128.toNumber(Economics.accountLockedBalance()))
+  )
+}
+
+export let doAttachedDeposit = () => {
+  Utils.valueReturnString(
+    toString(Int128.toNumber(Economics.attachedDeposit()))
+  )
+}
+
+export let doPrepaidGas = () => {
+  Utils.valueReturnString(toString(Economics.prepaidGas()))
+}
+
+export let doUsedGas = () => {
+  Utils.valueReturnString(toString(Economics.usedGas()))
+}

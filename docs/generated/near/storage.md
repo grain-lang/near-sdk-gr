@@ -139,7 +139,7 @@ Storage.getInt64(Storage.StringKey("foo"))
 ### Storage.**getInt128**
 
 ```grain
-getInt128 : String -> Option<Bytes>
+getInt128 : String -> Option<Int128.Int128>
 ```
 
 Looks up the given key in storage, returning any associated data
@@ -156,7 +156,7 @@ Returns:
 
 |type|description|
 |----|-----------|
-|`Option<Bytes>`|The associated int128 data, if it exists|
+|`Option<Int128.Int128>`|The associated int128 data, if it exists|
 
 Examples:
 
@@ -167,7 +167,7 @@ Storage.getInt128(Storage.StringKey("foo"))
 ### Storage.**getInt256**
 
 ```grain
-getInt256 : String -> Option<Bytes>
+getInt256 : String -> Option<Int256.Int256>
 ```
 
 Looks up the given key in storage, returning any associated data
@@ -184,7 +184,7 @@ Returns:
 
 |type|description|
 |----|-----------|
-|`Option<Bytes>`|The associated int256 data, if it exists|
+|`Option<Int256.Int256>`|The associated int256 data, if it exists|
 
 Examples:
 
@@ -489,7 +489,7 @@ Storage.setInt64(Storage.StringKey("foo"), 42L)
 ### Storage.**replaceInt128**
 
 ```grain
-replaceInt128 : (String, Bytes) -> Option<Bytes>
+replaceInt128 : (String, Bytes) -> Option<Int128.Int128>
 ```
 
 Associates the given key in storage with the given 128-bit integer,
@@ -508,7 +508,7 @@ Returns:
 
 |type|description|
 |----|-----------|
-|`Option<Bytes>`|The existing string data associated with `key`, if any|
+|`Option<Int128.Int128>`|The existing string data associated with `key`, if any|
 
 Examples:
 
@@ -519,7 +519,7 @@ Storage.setInt128(Storage.StringKey("foo"), Int128.fromInt64(5L))
 ### Storage.**replaceInt256**
 
 ```grain
-replaceInt256 : (String, Bytes) -> Option<Bytes>
+replaceInt256 : (String, Bytes) -> Option<Int256.Int256>
 ```
 
 Associates the given key in storage with the given 256-bit integer,
@@ -538,7 +538,7 @@ Returns:
 
 |type|description|
 |----|-----------|
-|`Option<Bytes>`|The existing string data associated with `key`, if any|
+|`Option<Int256.Int256>`|The existing string data associated with `key`, if any|
 
 Examples:
 
@@ -665,7 +665,7 @@ Storage.popInt64(Storage.StringKey("foo"))
 ### Storage.**popInt128**
 
 ```grain
-popInt128 : String -> Option<Bytes>
+popInt128 : String -> Option<Int128.Int128>
 ```
 
 Removes any storage entry associated with the given key,
@@ -683,7 +683,7 @@ Returns:
 
 |type|description|
 |----|-----------|
-|`Option<Bytes>`|The string value which was removed from storage|
+|`Option<Int128.Int128>`|The string value which was removed from storage|
 
 Examples:
 
@@ -694,7 +694,7 @@ Storage.popInt128(Storage.StringKey("foo"))
 ### Storage.**popInt256**
 
 ```grain
-popInt256 : String -> Option<Bytes>
+popInt256 : String -> Option<Int256.Int256>
 ```
 
 Removes any storage entry associated with the given key,
@@ -712,7 +712,7 @@ Returns:
 
 |type|description|
 |----|-----------|
-|`Option<Bytes>`|The string value which was removed from storage|
+|`Option<Int256.Int256>`|The string value which was removed from storage|
 
 Examples:
 

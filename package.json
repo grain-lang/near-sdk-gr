@@ -1,0 +1,14 @@
+{
+  "name": "grain-near-sdk",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Grain NEAR SDK.",
+  "workspaces": [
+    "test-suite"
+  ],
+  "scripts": {
+    "test-suite": "npm run --workspace=@grain-near-sdk/test-suite --",
+    "test": "npm run test-suite test --",
+    "clean": "npm run test-suite clean"
+  }
+}

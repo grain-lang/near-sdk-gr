@@ -1,0 +1,16 @@
+{
+  "name": "@grain-near-sdk/test-suite",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Tests for the Grain NEAR SDK.",
+  "workspaces": [
+    "example-contracts",
+    "unit-tests"
+  ],
+  "scripts": {
+    "example-contracts": "npm run --workspace=@grain-near-sdk-tests/example-contracts --",
+    "unit-tests": "npm run --workspace=@grain-near-sdk-tests/unit-tests --",
+    "test": "npm run example-contracts test && npm run unit-tests test",
+    "clean": "npm run example-contracts clean && npm run unit-tests clean"
+  }
+}

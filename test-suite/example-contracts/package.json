@@ -1,0 +1,14 @@
+{
+  "name": "@grain-near-sdk-tests/example-contracts",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Sample contracts for the Grain NEAR SDK.",
+  "workspaces": [
+    "counter"
+  ],
+  "scripts": {
+    "counter": "npm run --workspace=@grain-near-sdk-example-contracts/counter --",
+    "test": "npm run counter test --",
+    "clean": "npm run counter clean"
+  }
+}

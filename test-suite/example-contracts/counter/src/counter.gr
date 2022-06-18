@@ -1,0 +1,19 @@
+import Option from "option"
+import Storage from "near/storage"
+
+let key = "counter"
+
+export let setCounter = val => {
+  // Write the value to memory.
+  Storage.setInt32(key, val)
+}
+
+export let loadCounter = () => {
+  // Check if key is in storage
+  if (!(Storage.hasKey(key))) {
+    // Initialize to zero.
+    ignore(setCounter(0l))
+  }
+
+  Option.expect("key should be set", Storage.getInt32(key))
+}

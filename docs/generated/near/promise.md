@@ -43,7 +43,8 @@ Parameters:
 ### Promise.**batchActionFunctionCall**
 
 ```grain
-batchActionFunctionCall : (Promise, String, Bytes, Bytes, Int64) -> Void
+batchActionFunctionCall :
+  (Promise, String, Bytes, Int128.Int128, Int64) -> Void
 ```
 
 Appends a `FunctionCall` action to the batch of actions for the given promise.
@@ -57,13 +58,13 @@ Parameters:
 |`promise`|`Promise`|The promise to append the action to|
 |`methodName`|`String`|The name of the method to call|
 |`arguments`|`Bytes`|The arguments for the function call|
-|`amount`|`Bytes`|The amount to attach to the function call (a 128-bit integer)|
+|`amount`|`Int128.Int128`|The amount to attach to the function call (a 128-bit integer)|
 |`gas`|`Int64`|The amount of gas to attach to the function call|
 
 ### Promise.**batchActionTransfer**
 
 ```grain
-batchActionTransfer : (Promise, Bytes) -> Void
+batchActionTransfer : (Promise, Int128.Int128) -> Void
 ```
 
 Appends a `Transfer` action to the batch of actions for the given promise.
@@ -77,12 +78,12 @@ Parameters:
 |param|type|description|
 |-----|----|-----------|
 |`promise`|`Promise`|The promise to append the action to|
-|`amount`|`Bytes`|The amount to transfer (a 128-bit integer)|
+|`amount`|`Int128.Int128`|The amount to transfer (a 128-bit integer)|
 
 ### Promise.**batchActionStake**
 
 ```grain
-batchActionStake : (Promise, Bytes, Bytes) -> Void
+batchActionStake : (Promise, Int128.Int128, Bytes) -> Void
 ```
 
 Appends a `Stake` action to the batch of actions for the given promise.
@@ -97,14 +98,14 @@ Parameters:
 |param|type|description|
 |-----|----|-----------|
 |`promise`|`Promise`|The promise to append the action to|
-|`amount`|`Bytes`|The amount of tokens to stake (a 128-bit integer)|
+|`amount`|`Int128.Int128`|The amount of tokens to stake (a 128-bit integer)|
 |`publicKey`|`Bytes`|A public key of the validator node|
 
 ### Promise.**FunctionCallPermission**
 
 ```grain
 record FunctionCallPermission {
-  allowance: Option<Bytes>,
+  allowance: Option<Int128.Int128>,
   receiverId: String,
   methodNames: Array<String>,
 }
@@ -116,13 +117,13 @@ Source: https://nomicon.io/DataStructures/AccessKey.html#accesskeypermissionfunc
 
 This record has the following fields:
 - `allowance`: The balance limit (a 128-bit integer) to use by this access key to pay for function call gas and
-transaction fees. When this access key is used, both account balance and the allowance is
-decreased by the same value. `None` means unlimited allowance.
-NOTE: To change or increase the allowance, the old access key needs to be deleted and a new
-access key should be created.
+  transaction fees. When this access key is used, both account balance and the allowance is
+  decreased by the same value. `None` means unlimited allowance.
+  NOTE: To change or increase the allowance, the old access key needs to be deleted and a new
+  access key should be created.
 - `receiverId`: The access key only allows transactions with the given receiver's account id.
 - A list of method names that can be used. The access key only allows transactions with the
-function call of one of the given method names. Empty list means any method name can be used.
+  function call of one of the given method names. Empty list means any method name can be used.
 
 ### Promise.**AccessKeyPermission**
 
@@ -152,8 +153,8 @@ Source: https://nomicon.io/DataStructures/AccessKey.html#access-keys
 
 This record has the following fields:
 - `nonce`: The nonce for this access key. NOTE: In some cases the access key needs to be recreated. If the new access key reuses the
-same public key, the nonce of the new access key should be equal to the nonce of the old
-access key. It's required to avoid replaying old transactions again.
+  same public key, the nonce of the new access key should be equal to the nonce of the old
+  access key. It's required to avoid replaying old transactions again.
 - `permission`: Defines the permissions for this access key
 
 ### Promise.**batchActionAddKey**
@@ -363,7 +364,7 @@ Returns:
 ### Promise.**getResultInt128**
 
 ```grain
-getResultInt128 : Int64 -> Option<Result<Bytes, String>>
+getResultInt128 : Int64 -> Option<Result<Int128.Int128, String>>
 ```
 
 If the current function is invoked by a callback we can access the execution results of the
@@ -383,12 +384,12 @@ Returns:
 
 |type|description|
 |----|-----------|
-|`Option<Result<Bytes, String>>`|`None` if the promise has not completed, or `Some(Ok(result))` if it has successfully, or `Some(Err(msg))` if it has failed|
+|`Option<Result<Int128.Int128, String>>`|`None` if the promise has not completed, or `Some(Ok(result))` if it has successfully, or `Some(Err(msg))` if it has failed|
 
 ### Promise.**getResultInt256**
 
 ```grain
-getResultInt256 : Int64 -> Option<Result<Bytes, String>>
+getResultInt256 : Int64 -> Option<Result<Int256.Int256, String>>
 ```
 
 If the current function is invoked by a callback we can access the execution results of the
@@ -408,5 +409,5 @@ Returns:
 
 |type|description|
 |----|-----------|
-|`Option<Result<Bytes, String>>`|`None` if the promise has not completed, or `Some(Ok(result))` if it has successfully, or `Some(Err(msg))` if it has failed|
+|`Option<Result<Int256.Int256, String>>`|`None` if the promise has not completed, or `Some(Ok(result))` if it has successfully, or `Some(Err(msg))` if it has failed|
 

@@ -31,7 +31,7 @@
 // register_id, ptr
 export foreign wasm read_register: (
   WasmI64,
-  WasmI64
+  WasmI64,
 ) -> Void as readRegister from "env"
 /// Returns the size of the blob stored in the given register.
 /// * If register is used, then returns the size, which can potentially be zero;
@@ -65,7 +65,7 @@ export foreign wasm register_len: WasmI64 -> WasmI64 as registerLen from "env"
 export foreign wasm write_register: (
   WasmI64,
   WasmI64,
-  WasmI64
+  WasmI64,
 ) -> Void as writeRegister from "env"
 
 /*
@@ -316,7 +316,7 @@ export foreign wasm ecrecover: (
   WasmI64,
   WasmI64,
   WasmI64,
-  WasmI64
+  WasmI64,
 ) -> WasmI64 from "env"
 
 /*
@@ -337,7 +337,7 @@ export foreign wasm ecrecover: (
 // value_len, value_ptr
 export foreign wasm value_return: (
   WasmI64,
-  WasmI64
+  WasmI64,
 ) -> Void as valueReturn from "env"
 /// Terminates the execution of the program with panic `GuestPanic`.
 ///
@@ -360,7 +360,7 @@ export foreign wasm panic: () -> Void from "env"
 // len, ptr
 export foreign wasm panic_utf8: (
   WasmI64,
-  WasmI64
+  WasmI64,
 ) -> Void as panicUtf8 from "env"
 /// Logs the UTF-8 encoded string.
 /// If `len == u64::MAX` then treats the string as null-terminated with character `'\0'`.
@@ -431,7 +431,7 @@ export foreign wasm promise_create: (
   WasmI64,
   WasmI64,
   WasmI64,
-  WasmI64
+  WasmI64,
 ) -> WasmI64 as promiseCreate from "env"
 /// Attaches the callback that is executed after promise pointed by `promise_idx` is complete.
 ///
@@ -463,7 +463,7 @@ export foreign wasm promise_then: (
   WasmI64,
   WasmI64,
   WasmI64,
-  WasmI64
+  WasmI64,
 ) -> WasmI64 as promiseThen from "env"
 /// Creates a new promise which completes when time all promises passed as arguments complete.
 /// Cannot be used with registers. `promise_idx_ptr` points to an array of `u64` elements, with
@@ -494,7 +494,7 @@ export foreign wasm promise_then: (
 // promise_idx_ptr, promise_idx_count
 export foreign wasm promise_and: (
   WasmI64,
-  WasmI64
+  WasmI64,
 ) -> WasmI64 as promiseAnd from "env"
 /// Creates a new promise towards given `account_id` without any actions attached to it.
 ///
@@ -519,7 +519,7 @@ export foreign wasm promise_and: (
 // account_id_len, account_id_ptr
 export foreign wasm promise_batch_create: (
   WasmI64,
-  WasmI64
+  WasmI64,
 ) -> WasmI64 as promiseBatchCreate from "env"
 /// Creates a new promise towards given `account_id` without any actions attached, that is
 /// executed after promise pointed by `promise_idx` is complete.
@@ -547,7 +547,7 @@ export foreign wasm promise_batch_create: (
 export foreign wasm promise_batch_then: (
   WasmI64,
   WasmI64,
-  WasmI64
+  WasmI64,
 ) -> WasmI64 as promiseBatchThen from "env"
 
 // Promise Actions
@@ -591,7 +591,7 @@ export foreign wasm promise_batch_action_create_account: WasmI64 -> Void as prom
 export foreign wasm promise_batch_action_deploy_contract: (
   WasmI64,
   WasmI64,
-  WasmI64
+  WasmI64,
 ) -> Void as promiseBatchActionDeployContract from "env"
 /// Appends `FunctionCall` action to the batch of actions for the given promise pointed by
 /// `promise_idx`.
@@ -620,7 +620,7 @@ export foreign wasm promise_batch_action_function_call: (
   WasmI64,
   WasmI64,
   WasmI64,
-  WasmI64
+  WasmI64,
 ) -> Void as promiseBatchActionFunctionCall from "env"
 /// Appends `Transfer` action to the batch of actions for the given promise pointed by
 /// `promise_idx`.
@@ -642,7 +642,7 @@ export foreign wasm promise_batch_action_function_call: (
 // promise_index, amount_ptr
 export foreign wasm promise_batch_action_transfer: (
   WasmI64,
-  WasmI64
+  WasmI64,
 ) -> Void as promiseBatchActionTransfer from "env"
 /// Appends `Stake` action to the batch of actions for the given promise pointed by
 /// `promise_idx`.
@@ -667,7 +667,7 @@ export foreign wasm promise_batch_action_stake: (
   WasmI64,
   WasmI64,
   WasmI64,
-  WasmI64
+  WasmI64,
 ) -> Void as promiseBatchActionStake from "env"
 /// Appends `AddKey` action to the batch of actions for the given promise pointed by
 /// `promise_idx`. The access key will have `FullAccess` permission.
@@ -692,7 +692,7 @@ export foreign wasm promise_batch_action_add_key_with_full_access: (
   WasmI64,
   WasmI64,
   WasmI64,
-  WasmI64
+  WasmI64,
 ) -> Void as promiseBatchActionAddKeyWithFullAccess from "env"
 /// Appends `AddKey` action to the batch of actions for the given promise pointed by
 /// `promise_idx`. The access key will have `FunctionCall` permission.
@@ -724,7 +724,7 @@ export foreign wasm promise_batch_action_add_key_with_function_call: (
   WasmI64,
   WasmI64,
   WasmI64,
-  WasmI64
+  WasmI64,
 ) -> Void as promiseBatchActionAddKeyWithFunctionCall from "env"
 /// Appends `DeleteKey` action to the batch of actions for the given promise pointed by
 /// `promise_idx`.
@@ -748,7 +748,7 @@ export foreign wasm promise_batch_action_add_key_with_function_call: (
 export foreign wasm promise_batch_action_delete_key: (
   WasmI64,
   WasmI64,
-  WasmI64
+  WasmI64,
 ) -> Void as promiseBatchActionDeleteKey from "env"
 /// Appends `DeleteAccount` action to the batch of actions for the given promise pointed by
 /// `promise_idx`.
@@ -771,7 +771,7 @@ export foreign wasm promise_batch_action_delete_key: (
 export foreign wasm promise_batch_action_delete_account: (
   WasmI64,
   WasmI64,
-  WasmI64
+  WasmI64,
 ) -> Void as promiseBatchActionDeleteAccount from "env"
 
 // Promise API results
@@ -817,7 +817,7 @@ export foreign wasm promise_results_count: () -> WasmI64 as promiseResultsCount 
 // result_idx, register_id
 export foreign wasm promise_result: (
   WasmI64,
-  WasmI64
+  WasmI64,
 ) -> WasmI64 as promiseResult from "env"
 /// When promise `promise_idx` finishes executing its result is considered to be the result of
 /// the current function.
@@ -865,7 +865,7 @@ export foreign wasm storage_write: (
   WasmI64,
   WasmI64,
   WasmI64,
-  WasmI64
+  WasmI64,
 ) -> WasmI64 as storageWrite from "env"
 /// Reads the value stored under the given key.
 /// * If key is used copies the content of the value into the `register_id`, even if the content
@@ -889,7 +889,7 @@ export foreign wasm storage_write: (
 export foreign wasm storage_read: (
   WasmI64,
   WasmI64,
-  WasmI64
+  WasmI64,
 ) -> WasmI64 as storageRead from "env"
 /// Removes the value stored under the given key.
 /// * If key is used, removes the key-value from the trie and copies the content of the value
@@ -915,7 +915,7 @@ export foreign wasm storage_read: (
 export foreign wasm storage_remove: (
   WasmI64,
   WasmI64,
-  WasmI64
+  WasmI64,
 ) -> WasmI64 as storageRemove from "env"
 /// Checks if there is a key-value pair.
 /// * If key is used returns `1`, even if the value is zero bytes;
@@ -933,7 +933,7 @@ export foreign wasm storage_remove: (
 // key_len, key_ptr
 export foreign wasm storage_has_key: (
   WasmI64,
-  WasmI64
+  WasmI64,
 ) -> WasmI64 as storageHasKey from "env"
 /// DEPRECATED
 /// Creates an iterator object inside the host. Returns the identifier that uniquely
@@ -956,7 +956,7 @@ export foreign wasm storage_has_key: (
 // prefix_len, prefix_ptr
 export foreign wasm storage_iter_prefix: (
   WasmI64,
-  WasmI64
+  WasmI64,
 ) -> WasmI64 as storageIterPrefix from "env"
 /// DEPRECATED
 /// Iterates over all key-values such that keys are between `start` and `end`, where `start` is
@@ -981,7 +981,7 @@ export foreign wasm storage_iter_range: (
   WasmI64,
   WasmI64,
   WasmI64,
-  WasmI64
+  WasmI64,
 ) -> WasmI64 as storageIterRange from "env"
 /// DEPRECATED
 /// Advances iterator and saves the next key and value in the register.
@@ -1016,7 +1016,7 @@ export foreign wasm storage_iter_range: (
 export foreign wasm storage_iter_next: (
   WasmI64,
   WasmI64,
-  WasmI64
+  WasmI64,
 ) -> WasmI64 as storageIterNext from "env"
 /// Called by gas metering injected into Wasm. Counts both towards `burnt_gas` and `used_gas`.
 ///
@@ -1043,7 +1043,7 @@ export foreign wasm gas: WasmI32 -> Void from "env"
 export foreign wasm validator_stake: (
   WasmI64,
   WasmI64,
-  WasmI64
+  WasmI64,
 ) -> Void as validatorStake from "env"
 /// Get the total validator stake of the current epoch.
 /// Write the u128 value into `stake_ptr`.

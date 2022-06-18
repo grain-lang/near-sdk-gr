@@ -1,0 +1,11 @@
+import { add as (+), sub as (-) } from "int32"
+import Result from "result"
+import Utils from "near/utils"
+import Random from "sys/random"
+
+export let getRandom = () => {
+  let value = toString(Result.unwrap(Random.random())) ++
+    " " ++
+    toString(Result.unwrap(Random.random()))
+  Utils.valueReturnString(value)
+}

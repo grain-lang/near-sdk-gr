@@ -1,7 +1,7 @@
 ### Validator.**stake**
 
 ```grain
-stake : String -> Bytes
+stake : String -> Int128.Int128
 ```
 
 Get the stake of an account, if the account is currently a validator. Otherwise returns 0.
@@ -16,7 +16,7 @@ Returns:
 
 |type|description|
 |----|-----------|
-|`Bytes`|The stake of `accountId` (a 128-bit integer)|
+|`Int128.Int128`|The stake of `accountId` (a 128-bit integer)|
 
 Examples:
 
@@ -27,7 +27,7 @@ Validator.stake(address)
 ### Validator.**totalStake**
 
 ```grain
-totalStake : () -> Bytes
+totalStake : () -> Int128.Int128
 ```
 
 Get the total validator stake of the current epoch.
@@ -36,7 +36,7 @@ Returns:
 
 |type|description|
 |----|-----------|
-|`Bytes`|The total validator stake (a 128-bit integer)|
+|`Int128.Int128`|The total validator stake (a 128-bit integer)|
 
 Examples:
 

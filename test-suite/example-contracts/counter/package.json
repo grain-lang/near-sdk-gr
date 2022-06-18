@@ -1,0 +1,21 @@
+{
+  "name": "@grain-near-sdk-example-contracts/counter",
+  "version": "0.0.1",
+  "description": "",
+  "scripts": {
+    "build": "node script/grainfind.js compile src/index.gr",
+    "pretest": "npm run clean && npm run build",
+    "test": "ava",
+    "clean": "del-cli \"**/*.wasm\" \"**/*.wat\" \"**/*.modsig\""
+  },
+  "devDependencies": {
+    "ava": "^4.3.0",
+    "near-workspaces": "^2.0.0",
+    "del-cli": "^4.0.1"
+  },
+  "ava": {
+    "files": ["./tests/**.test.js"],
+    "verbose": true,
+    "timeout": "60s"
+  }
+}

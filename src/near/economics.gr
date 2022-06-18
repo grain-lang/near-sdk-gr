@@ -16,7 +16,7 @@ import Int128 from "./internal/int128"
 export let accountBalance = () => {
   let ret = Int128.allocate()
   Native.accountBalance(
-    WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(ret), 8n)),
+    WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(ret), 8n))
   )
   ret
 }
@@ -31,7 +31,7 @@ export let accountBalance = () => {
 export let accountLockedBalance = () => {
   let ret = Int128.allocate()
   Native.accountLockedBalance(
-    WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(ret), 8n)),
+    WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(ret), 8n))
   )
   ret
 }
@@ -47,7 +47,7 @@ export let accountLockedBalance = () => {
 export let attachedDeposit = () => {
   let ret = Int128.allocate()
   Native.attachedDeposit(
-    WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(ret), 8n)),
+    WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(ret), 8n))
   )
   ret
 }

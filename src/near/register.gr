@@ -10,7 +10,7 @@ import {
   allocateString,
   allocateBytes,
   allocateInt32,
-  allocateInt64
+  allocateInt64,
 } from "runtime/dataStructures"
 
 // For the moment, the `native.gr` API is needed to do host-to-host blob passing.
@@ -32,7 +32,7 @@ export let readString = id => {
   let valueLen = Native.registerLen(idW)
   let value = allocateString(WasmI32.wrapI64(valueLen))
   Native.readRegister(idW, WasmI64.extendI32U(WasmI32.add(value, 8n)))
-  WasmI32.toGrain(value): (String)
+  WasmI32.toGrain(value): String
 }
 
 /**
@@ -51,7 +51,7 @@ export let readBytes = id => {
   let valueLen = Native.registerLen(idW)
   let value = allocateBytes(WasmI32.wrapI64(valueLen))
   Native.readRegister(idW, WasmI64.extendI32U(WasmI32.add(value, 8n)))
-  WasmI32.toGrain(value): (Bytes)
+  WasmI32.toGrain(value): Bytes
 }
 
 /**
@@ -71,7 +71,7 @@ export let readInt32 = id => {
   assert WasmI64.eq(valueLen, 4N)
   let value = allocateInt32()
   Native.readRegister(idW, WasmI64.extendI32U(WasmI32.add(value, 8n)))
-  WasmI32.toGrain(value): (Int32)
+  WasmI32.toGrain(value): Int32
 }
 
 /**
@@ -91,7 +91,7 @@ export let readInt64 = id => {
   assert WasmI64.eq(valueLen, 8N)
   let value = allocateInt64()
   Native.readRegister(idW, WasmI64.extendI32U(WasmI32.add(value, 8n)))
-  WasmI32.toGrain(value): (Int64)
+  WasmI32.toGrain(value): Int64
 }
 
 // [TODO] migrate to actual int128/int256 types when available
@@ -113,7 +113,7 @@ export let readInt128 = id => {
   assert WasmI64.eq(valueLen, 16N)
   let value = WasmI32.fromGrain(Int128.allocate())
   Native.readRegister(idW, WasmI64.extendI32U(WasmI32.add(value, 8n)))
-  WasmI32.toGrain(value): (Bytes)
+  Int128.fromBytes(WasmI32.toGrain(value))
 }
 
 /**
@@ -133,5 +133,5 @@ export let readInt256 = id => {
   assert WasmI64.eq(valueLen, 32N)
   let value = WasmI32.fromGrain(Int256.allocate())
   Native.readRegister(idW, WasmI64.extendI32U(WasmI32.add(value, 8n)))
-  WasmI32.toGrain(value): (Bytes)
+  Int256.fromBytes(WasmI32.toGrain(value))
 }

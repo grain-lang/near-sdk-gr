@@ -117,7 +117,7 @@ Register.readInt64(0L)
 ### Register.**readInt128**
 
 ```grain
-readInt128 : Int64 -> Bytes
+readInt128 : Int64 -> Int128.Int128
 ```
 
 Reads the contents of the given register, interpreting
@@ -135,7 +135,7 @@ Returns:
 
 |type|description|
 |----|-----------|
-|`Bytes`|The contents of the given register|
+|`Int128.Int128`|The contents of the given register|
 
 Examples:
 
@@ -146,7 +146,7 @@ Register.readInt128(0L)
 ### Register.**readInt256**
 
 ```grain
-readInt256 : Int64 -> Bytes
+readInt256 : Int64 -> Int256.Int256
 ```
 
 Reads the contents of the given register, interpreting
@@ -164,7 +164,7 @@ Returns:
 
 |type|description|
 |----|-----------|
-|`Bytes`|The contents of the given register|
+|`Int256.Int256`|The contents of the given register|
 
 Examples:
 

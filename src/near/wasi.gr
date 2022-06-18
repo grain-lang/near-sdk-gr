@@ -8,7 +8,7 @@ import foreign wasm log_utf8: (WasmI64, WasmI64) -> Void as log from "env"
 import foreign wasm random_seed: WasmI64 -> Void as randomSeed from "env"
 import foreign wasm read_register: (
   WasmI64,
-  WasmI64
+  WasmI64,
 ) -> Void as readRegister from "env"
 import foreign wasm register_len: WasmI64 -> WasmI64 as registerLen from "env"
 
@@ -151,30 +151,10 @@ export let fd_write: (WasmI32, WasmI32, WasmI32, WasmI32) -> WasmI32 =
 }
 
 let mut seedSet = false
-let mut seed = 0L
-let mut ctr = 0L
-let mut tmp = 0L // can't call malloc here, so we read memory into this
-
-let initSeed = () => {
-  if (seedSet) {
-    0n
-  } else {
-    randomSeed(0N)
-    let len = registerLen(0N)
-    if (WasmI64.gtU(len, 4N)) {
-      // we can't partially read in the register, so choke if the seed is > 4 bytes
-      _ENOTCAPABLE
-    } else {
-      // read 0-4 bytes into buf
-      readRegister(
-        0N,
-        WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(seed), 8n)),
-      )
-      seedSet = true
-      0n
-    }
-  }
-}
+// scratch buffer; overwritten by below operations
+let buf = "fooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo"
+//         ^~~~~~~~^~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+//         counter result  buffer for random seed
 
 // https://arxiv.org/pdf/2004.06278v3.pdf
 let squares = (ctr: WasmI64, key: WasmI64) => {
@@ -185,30 +165,93 @@ let squares = (ctr: WasmI64, key: WasmI64) => {
   x = WasmI64.add(WasmI64.mul(x, x), y)
   x = WasmI64.or(WasmI64.shrU(x, 32N), WasmI64.shl(x, 32N))
   // round 2
-  x = WasmI64.add(WasmI64.mul(x, x), y)
+  x = WasmI64.add(WasmI64.mul(x, x), z)
   x = WasmI64.or(WasmI64.shrU(x, 32N), WasmI64.shl(x, 32N))
   // round 3
-  x = WasmI64.add(WasmI64.mul(x, x), y)
-  x = WasmI64.or(WasmI64.shrU(x, 32N), WasmI64.shl(x, 32N))
-  // round 4
   x = WasmI64.add(WasmI64.mul(x, x), y)
   x = WasmI64.or(WasmI64.shrU(x, 32N), WasmI64.shl(x, 32N))
   WasmI32.wrapI64(WasmI64.shrU(WasmI64.add(WasmI64.mul(x, x), z), 32N))
 }
 
+let initSeed = () => {
+  if (seedSet) {
+    0n
+  } else {
+    randomSeed(0N)
+    let len = registerLen(0N)
+    if (WasmI64.gtU(len, 64N)) {
+      // we can't partially read in the register, so choke if the seed is > 4 bytes
+      _EOVERFLOW
+    } else {
+      // read 0-4 bytes into buf
+      readRegister(
+        0N,
+        WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(buf), 24n))
+      )
+      // Our PRNG uses an 8-byte seed, so if the seed is greater than 8 bytes
+      // we XOR successive windows to make it so that all bytes of the seed
+      // impact the PRNG.
+      if (WasmI64.gtU(len, 8N)) {
+        // nWindows := ceil(len / 8)
+        let nWindows = WasmI32.wrapI64(WasmI64.divU(WasmI64.add(len, 7N), 8N))
+        let mut idx = 1n
+        let bufPtr = WasmI32.fromGrain(buf)
+        for (
+          let mut idx = 1n;
+          WasmI32.leU(idx, nWindows);
+          idx = WasmI32.add(idx, 1n)
+        ) {
+          WasmI64.store(
+            bufPtr,
+            WasmI64.xor(
+              WasmI64.load(bufPtr, 8n),
+              WasmI64.load(WasmI32.add(bufPtr, WasmI32.mul(idx, 8n)), 8n)
+            ),
+            24n
+          )
+        }
+      }
+      // store counter
+      WasmI64.store(WasmI32.fromGrain(buf), 0N, 8n)
+      // sometimes, we can end up with a seed which will produce zeros for the first
+      // few iterations. to prevent this, we churn until we generate a MSB of 1
+      while (
+        WasmI32.gtU(
+          WasmI32.clz(
+            squares(
+              WasmI64.load(WasmI32.fromGrain(buf), 8n),
+              WasmI64.load(WasmI32.fromGrain(buf), 24n)
+            )
+          ),
+          0n
+        )
+      ) {
+        // MSB is zero. Increment counter
+        WasmI64.store(
+          WasmI32.fromGrain(buf),
+          WasmI64.add(WasmI64.load(WasmI32.fromGrain(buf), 8n), 1N),
+          8n
+        )
+      }
+      seedSet = true
+      0n
+    }
+  }
+}
+
 let nextRand = () => {
   // PRECONDITION: Seed is set
-  let ctrVal = WasmI64.load(WasmI32.fromGrain(ctr), 8n)
-  let seedVal = WasmI64.load(WasmI32.fromGrain(seed), 8n)
+  let ctrVal = WasmI64.load(WasmI32.fromGrain(buf), 8n)
+  let seedVal = WasmI64.load(WasmI32.fromGrain(buf), 24n)
   let squares = squares(ctrVal, seedVal)
-  WasmI32.store(WasmI32.fromGrain(tmp), squares, 8n)
-  WasmI64.store(WasmI32.fromGrain(ctr), WasmI64.add(ctrVal, 1N), 8n)
+  WasmI32.store(WasmI32.fromGrain(buf), squares, 16n)
+  WasmI64.store(WasmI32.fromGrain(buf), WasmI64.add(ctrVal, 1N), 8n)
   void
 }
 
-primitive (&&) : (Bool, Bool) -> Bool = "@and"
+primitive (&&): (Bool, Bool) -> Bool = "@and"
 
-export let random_get = (buf: WasmI32, bufLen: WasmI32) => {
+export let random_get = (inbuf: WasmI32, bufLen: WasmI32) => {
   let res = initSeed()
   if (WasmI32.eqz(res)) {
     // seed is valid. generate the random data
@@ -220,9 +263,9 @@ export let random_get = (buf: WasmI32, bufLen: WasmI32) => {
       let nextI = 0n
       while (WasmI32.gtU(remaining, 0n) && WasmI32.gtU(nextRemaining, 0n)) {
         WasmI32.store8(
-          WasmI32.add(buf, i),
-          WasmI32.load8U(WasmI32.add(buf, nextI), 8n),
-          0n,
+          WasmI32.add(inbuf, i),
+          WasmI32.load8U(WasmI32.add(WasmI32.fromGrain(buf), nextI), 16n),
+          0n
         )
         i = WasmI32.add(i, 1n)
         nextRemaining = WasmI32.sub(nextRemaining, 1n)
@@ -231,7 +274,7 @@ export let random_get = (buf: WasmI32, bufLen: WasmI32) => {
     }
     _ESUCCESS
   } else {
-    _ENOTCAPABLE
+    res
   }
 }
 
@@ -267,7 +310,7 @@ export let path_open =
     _: WasmI32,
     _: WasmI32,
   ) =>
-  0n
+  _ENOTCAPABLE
 export let fd_read = (_: WasmI32, _: WasmI32, _: WasmI32, _: WasmI32) =>
   _ENOTCAPABLE
 export let fd_pread =
@@ -278,7 +321,7 @@ export let fd_pread =
     _: WasmI64,
     _: WasmI32,
   ) =>
-  0n
+  _ENOTCAPABLE
 // fd_write above
 export let fd_pwrite =
   (
@@ -288,7 +331,7 @@ export let fd_pwrite =
     _: WasmI64,
     _: WasmI32,
   ) =>
-  0n
+  _ENOTCAPABLE
 export let fd_allocate = (_: WasmI32, _: WasmI64, _: WasmI64) => _ENOTCAPABLE
 export let fd_close = (_: WasmI32) => _ENOTCAPABLE
 export let fd_datasync = (_: WasmI32) => _ENOTCAPABLE
@@ -306,7 +349,7 @@ export let fd_filestat_set_times =
     _: WasmI64,
     _: WasmI32,
   ) =>
-  0n
+  _ENOTCAPABLE
 export let fd_readdir =
   (
     _: WasmI32,
@@ -315,7 +358,7 @@ export let fd_readdir =
     _: WasmI64,
     _: WasmI32,
   ) =>
-  0n
+  _ENOTCAPABLE
 export let fd_renumber = (_: WasmI32, _: WasmI32) => _ENOTCAPABLE
 export let fd_seek = (_: WasmI32, _: WasmI64, _: WasmI32, _: WasmI32) =>
   _ENOTCAPABLE
@@ -330,7 +373,7 @@ export let path_filestat_get =
     _: WasmI32,
     _: WasmI32,
   ) =>
-  0n
+  _ENOTCAPABLE
 export let path_filestat_set_times =
   (
     _: WasmI32,
@@ -341,7 +384,7 @@ export let path_filestat_set_times =
     _: WasmI64,
     _: WasmI32,
   ) =>
-  0n
+  _ENOTCAPABLE
 export let path_link =
   (
     _: WasmI32,
@@ -352,7 +395,7 @@ export let path_link =
     _: WasmI32,
     _: WasmI32,
   ) =>
-  0n
+  _ENOTCAPABLE
 export let path_symlink =
   (
     _: WasmI32,
@@ -361,7 +404,7 @@ export let path_symlink =
     _: WasmI32,
     _: WasmI32,
   ) =>
-  0n
+  _ENOTCAPABLE
 export let path_unlink_file = (_: WasmI32, _: WasmI32, _: WasmI32) =>
   _ENOTCAPABLE
 export let path_readlink =
@@ -373,7 +416,7 @@ export let path_readlink =
     _: WasmI32,
     _: WasmI32,
   ) =>
-  0n
+  _ENOTCAPABLE
 export let path_remove_directory = (_: WasmI32, _: WasmI32, _: WasmI32) =>
   _ENOTCAPABLE
 export let path_rename =
@@ -385,4 +428,4 @@ export let path_rename =
     _: WasmI32,
     _: WasmI32,
   ) =>
-  0n
+  _ENOTCAPABLE

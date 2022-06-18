@@ -10,7 +10,9 @@ import String from "string"
 import Buffer from "buffer"
 import Int64 from "int64"
 
-record Promise { index: Int64 }
+record Promise {
+  index: Int64,
+}
 
 // NOTE:
 // arguments is a JSON-formatted string: (https://github.com/near/nearcore/blob/a20c12ec02d7f22550139da38838efd1fba75ede/runtime/near-vm-logic/src/logic.rs#L578)
@@ -30,19 +32,19 @@ export let create =
     accountId: String,
     methodName: String,
     arguments: String,
-    amount: Bytes,
+    amount: Int128.Int128,
     gas: Int64,
   ) => {
   let acctPtr = WasmI64.extendI32U(
-    WasmI32.add(WasmI32.fromGrain(accountId), 8n),
+    WasmI32.add(WasmI32.fromGrain(accountId), 8n)
   )
   let acctLen = WasmI64.load32U(WasmI32.fromGrain(accountId), 4n)
   let methodPtr = WasmI64.extendI32U(
-    WasmI32.add(WasmI32.fromGrain(methodName), 8n),
+    WasmI32.add(WasmI32.fromGrain(methodName), 8n)
   )
   let methodLen = WasmI64.load32U(WasmI32.fromGrain(methodName), 4n)
   let argumentsPtr = WasmI64.extendI32U(
-    WasmI32.add(WasmI32.fromGrain(arguments), 8n),
+    WasmI32.add(WasmI32.fromGrain(arguments), 8n)
   )
   let argumentsLen = WasmI64.load32U(WasmI32.fromGrain(arguments), 4n)
   let amountPtr = WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(amount), 8n))
@@ -55,7 +57,7 @@ export let create =
     argumentsLen,
     argumentsPtr,
     amountPtr,
-    gasW,
+    gasW
   )
   { index: Conv.toInt64(promiseIdxW), }
 }
@@ -78,20 +80,20 @@ export let then =
     accountId: String,
     methodName: String,
     arguments: Bytes,
-    amount: Bytes,
+    amount: Int128.Int128,
     gas: Int64,
   ) => {
   let { index } = promise
   let acctPtr = WasmI64.extendI32U(
-    WasmI32.add(WasmI32.fromGrain(accountId), 8n),
+    WasmI32.add(WasmI32.fromGrain(accountId), 8n)
   )
   let acctLen = WasmI64.load32U(WasmI32.fromGrain(accountId), 4n)
   let methodPtr = WasmI64.extendI32U(
-    WasmI32.add(WasmI32.fromGrain(methodName), 8n),
+    WasmI32.add(WasmI32.fromGrain(methodName), 8n)
   )
   let methodLen = WasmI64.load32U(WasmI32.fromGrain(methodName), 4n)
   let argumentsPtr = WasmI64.extendI32U(
-    WasmI32.add(WasmI32.fromGrain(arguments), 8n),
+    WasmI32.add(WasmI32.fromGrain(arguments), 8n)
   )
   let argumentsLen = WasmI64.load32U(WasmI32.fromGrain(arguments), 4n)
   let amountPtr = WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(amount), 8n))
@@ -105,7 +107,7 @@ export let then =
     argumentsLen,
     argumentsPtr,
     amountPtr,
-    gasW,
+    gasW
   )
   { index: Conv.toInt64(promiseIdxW), }
 }
@@ -130,7 +132,7 @@ let preparePromises = (promises: Array<Promise>) => {
 export let and = (promises: Array<Promise>) => {
   let prepared = preparePromises(promises)
   let promisesPtr = WasmI64.extendI32U(
-    WasmI32.add(WasmI32.fromGrain(promises), 8n),
+    WasmI32.add(WasmI32.fromGrain(promises), 8n)
   )
   let promisesLen = WasmI64.load32U(WasmI32.fromGrain(promises), 4n)
   let promiseIdxW = Native.promiseAnd(promisesPtr, promisesLen)
@@ -173,7 +175,7 @@ export let batchActionDeployContract = (promise, code: Bytes) => {
   Native.promiseBatchActionDeployContract(
     Conv.fromInt64(index),
     codeLen,
-    codePtr,
+    codePtr
   )
 }
 
@@ -193,16 +195,16 @@ export let batchActionFunctionCall =
     promise,
     methodName: String,
     arguments: Bytes,
-    amount: Bytes,
+    amount: Int128.Int128,
     gas: Int64,
   ) => {
   let { index } = promise
   let methodPtr = WasmI64.extendI32U(
-    WasmI32.add(WasmI32.fromGrain(methodName), 8n),
+    WasmI32.add(WasmI32.fromGrain(methodName), 8n)
   )
   let methodLen = WasmI64.load32U(WasmI32.fromGrain(methodName), 4n)
   let argumentsPtr = WasmI64.extendI32U(
-    WasmI32.add(WasmI32.fromGrain(arguments), 8n),
+    WasmI32.add(WasmI32.fromGrain(arguments), 8n)
   )
   let argumentsLen = WasmI64.load32U(WasmI32.fromGrain(arguments), 4n)
   let amountPtr = WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(amount), 8n))
@@ -214,7 +216,7 @@ export let batchActionFunctionCall =
     argumentsLen,
     argumentsPtr,
     amountPtr,
-    gasW,
+    gasW
   )
 }
 
@@ -228,7 +230,7 @@ export let batchActionFunctionCall =
  * @param promise: The promise to append the action to
  * @param amount: The amount to transfer (a 128-bit integer)
  */
-export let batchActionTransfer = (promise, amount: Bytes) => {
+export let batchActionTransfer = (promise, amount: Int128.Int128) => {
   let { index } = promise
   let amountPtr = WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(amount), 8n))
   Native.promiseBatchActionTransfer(Conv.fromInt64(index), amountPtr)
@@ -246,18 +248,23 @@ export let batchActionTransfer = (promise, amount: Bytes) => {
  * @param amount: The amount of tokens to stake (a 128-bit integer)
  * @param publicKey: A public key of the validator node
  */
-export let batchActionStake = (promise, amount: Bytes, publicKey: Bytes) => {
+export let batchActionStake =
+  (
+    promise,
+    amount: Int128.Int128,
+    publicKey: Bytes,
+  ) => {
   let { index } = promise
   let amountPtr = WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(amount), 8n))
   let publicKeyPtr = WasmI64.extendI32U(
-    WasmI32.add(WasmI32.fromGrain(publicKey), 8n),
+    WasmI32.add(WasmI32.fromGrain(publicKey), 8n)
   )
   let publicKeyLen = WasmI64.load32U(WasmI32.fromGrain(publicKey), 4n)
   Native.promiseBatchActionStake(
     Conv.fromInt64(index),
     amountPtr,
     publicKeyLen,
-    publicKeyPtr,
+    publicKeyPtr
   )
 }
 
@@ -277,7 +284,7 @@ export let batchActionStake = (promise, amount: Bytes, publicKey: Bytes) => {
  *   function call of one of the given method names. Empty list means any method name can be used.
  */
 export record FunctionCallPermission {
-  allowance: Option<Bytes>,
+  allowance: Option<Int128.Int128>,
   receiverId: String,
   methodNames: Array<String>, // [TODO] should this be List<String> instead?
 }
@@ -303,7 +310,10 @@ export enum AccessKeyPermission {
  *   access key. It's required to avoid replaying old transactions again.
  * - `permission`: Defines the permissions for this access key
  */
-export record AccessKey { nonce: Bytes, permission: AccessKeyPermission }
+export record AccessKey {
+  nonce: Bytes,
+  permission: AccessKeyPermission,
+}
 
 // Comma-separated; reverse-engineered from https://github.com/near/nearcore/blob/5d12069ca305cc781c77d63e3c932e1c11f06ac4/runtime/near-vm-logic/src/utils.rs#L8
 
@@ -341,7 +351,7 @@ export let batchActionAddKey =
   let { nonce, permission } = accessKey
   let noncePtr = WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(nonce), 8n))
   let publicKeyPtr = WasmI64.extendI32U(
-    WasmI32.add(WasmI32.fromGrain(publicKey), 8n),
+    WasmI32.add(WasmI32.fromGrain(publicKey), 8n)
   )
   let publicKeyLen = WasmI64.load32U(WasmI32.fromGrain(publicKey), 4n)
   match (permission) {
@@ -350,7 +360,7 @@ export let batchActionAddKey =
         Conv.fromInt64(index),
         publicKeyLen,
         publicKeyPtr,
-        noncePtr,
+        noncePtr
       )
     },
     FunctionCallAccess({ allowance, receiverId, methodNames }) => {
@@ -359,18 +369,18 @@ export let batchActionAddKey =
         None => Int128.allocate(),
       }
       let allowancePtr = WasmI64.extendI32U(
-        WasmI32.add(WasmI32.fromGrain(allowance), 8n),
+        WasmI32.add(WasmI32.fromGrain(allowance), 8n)
       )
       let receiverIdPtr = WasmI64.extendI32U(
-        WasmI32.add(WasmI32.fromGrain(receiverId), 8n),
+        WasmI32.add(WasmI32.fromGrain(receiverId), 8n)
       )
       let receiverIdLen = WasmI64.load32U(WasmI32.fromGrain(receiverId), 4n)
       let preppedMethodNames = prepareMethodNames(methodNames)
       let methodNamesLen = Conv.fromInt64(
-        Int64.fromNumber(Buffer.length(preppedMethodNames)),
+        Int64.fromNumber(Buffer.length(preppedMethodNames))
       )
       let methodNamesPtr = WasmI64.extendI32U(
-        WasmI32.add(WasmI32.fromGrain(Buffer.toBytes(preppedMethodNames)), 8n),
+        WasmI32.add(WasmI32.fromGrain(Buffer.toBytes(preppedMethodNames)), 8n)
       )
       Native.promiseBatchActionAddKeyWithFunctionCall(
         Conv.fromInt64(index),
@@ -381,7 +391,7 @@ export let batchActionAddKey =
         receiverIdLen,
         receiverIdPtr,
         methodNamesLen,
-        methodNamesPtr,
+        methodNamesPtr
       )
     },
   }
@@ -400,13 +410,13 @@ export let batchActionAddKey =
 export let batchActionDeleteKey = (promise, publicKey: Bytes) => {
   let { index } = promise
   let publicKeyPtr = WasmI64.extendI32U(
-    WasmI32.add(WasmI32.fromGrain(publicKey), 8n),
+    WasmI32.add(WasmI32.fromGrain(publicKey), 8n)
   )
   let publicKeyLen = WasmI64.load32U(WasmI32.fromGrain(publicKey), 4n)
   Native.promiseBatchActionDeleteKey(
     Conv.fromInt64(index),
     publicKeyLen,
-    publicKeyPtr,
+    publicKeyPtr
   )
 }
 
@@ -424,13 +434,13 @@ export let batchActionDeleteKey = (promise, publicKey: Bytes) => {
 export let batchActionDeleteAccount = (promise, beneficiaryId: String) => {
   let { index } = promise
   let benificiaryPtr = WasmI64.extendI32U(
-    WasmI32.add(WasmI32.fromGrain(beneficiaryId), 8n),
+    WasmI32.add(WasmI32.fromGrain(beneficiaryId), 8n)
   )
   let benificiaryLen = WasmI64.load32U(WasmI32.fromGrain(beneficiaryId), 4n)
   Native.promiseBatchActionDeleteAccount(
     Conv.fromInt64(index),
     benificiaryLen,
-    benificiaryPtr,
+    benificiaryPtr
   )
 }
 

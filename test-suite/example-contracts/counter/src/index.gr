@@ -1,0 +1,17 @@
+/* grainc-flags --no-gc --no-bulk-memory */
+import { add as (+), sub as (-) } from "int32"
+import Utils from "near/utils"
+import { setCounter, loadCounter } from "./counter"
+
+export let increment = () => {
+  ignore(setCounter(loadCounter() + 1l))
+}
+
+export let decrement = () => {
+  ignore(setCounter(loadCounter() - 1l))
+}
+
+export let getCounter = () => {
+  let value = toString(loadCounter())
+  Utils.valueReturnString(value)
+}

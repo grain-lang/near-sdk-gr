@@ -1,0 +1,21 @@
+{
+  "name": "@grain-near-sdk-tests/unit-tests",
+  "version": "0.0.1",
+  "description": "",
+  "scripts": {
+    "build": "node script/grainfind.js compile contracts/utilsTests.gr && node script/grainfind.js compile contracts/wasiTests.gr",
+    "pretest": "npm run clean && npm run build",
+    "test": "ava",
+    "clean": "del-cli \"**/*.wasm\" \"**/*.wat\" \"**/*.modsig\""
+  },
+  "devDependencies": {
+    "ava": "^4.3.0",
+    "near-workspaces": "^2.0.0",
+    "del-cli": "^4.0.1",
+    "which": "^2.0.2"
+  },
+  "ava": {
+    "files": ["./tests/**.test.js"],
+    "verbose": true
+  }
+}

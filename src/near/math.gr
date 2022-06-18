@@ -4,7 +4,12 @@ import WasmI64 from "runtime/unsafe/wasmi64"
 import Native from "./internal/native"
 import Register from "./register"
 
-export enum HashAlgorithm { SHA256, KECCAK256, KECCAK512, RIPEMD160 }
+export enum HashAlgorithm {
+  SHA256,
+  KECCAK256,
+  KECCAK512,
+  RIPEMD160,
+}
 
 let performHash = (alg, valueLen, valuePtr, register) => {
   match (alg) {

@@ -1,2 +1,5 @@
 *.wasm
-
+node_modules
+*.wasm.*
+.near-credentials
+test/**/package-lock.json

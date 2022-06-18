@@ -1,7 +1,7 @@
 ### Economics.**accountBalance**
 
 ```grain
-accountBalance : () -> Bytes
+accountBalance : () -> Int128.Int128
 ```
 
 The current balance of the given account. This includes the attached_deposit that was
@@ -11,7 +11,7 @@ Returns:
 
 |type|description|
 |----|-----------|
-|`Bytes`|The current account balance (a 128-bit integer)|
+|`Int128.Int128`|The current account balance (a 128-bit integer)|
 
 Examples:
 
@@ -22,7 +22,7 @@ Economics.accountBalance()
 ### Economics.**accountLockedBalance**
 
 ```grain
-accountLockedBalance : () -> Bytes
+accountLockedBalance : () -> Int128.Int128
 ```
 
 The current amount of tokens locked due to staking.
@@ -31,7 +31,7 @@ Returns:
 
 |type|description|
 |----|-----------|
-|`Bytes`|The currently staked account balance (a 128-bit integer)|
+|`Int128.Int128`|The currently staked account balance (a 128-bit integer)|
 
 Examples:
 
@@ -42,7 +42,7 @@ Economics.accountLockedBalance()
 ### Economics.**attachedDeposit**
 
 ```grain
-attachedDeposit : () -> Bytes
+attachedDeposit : () -> Int128.Int128
 ```
 
 The balance that was attached to the call that will be immediately deposited before the
@@ -52,7 +52,7 @@ Returns:
 
 |type|description|
 |----|-----------|
-|`Bytes`|The attached deposit (a 128-bit integer)|
+|`Int128.Int128`|The attached deposit (a 128-bit integer)|
 
 Examples:
 

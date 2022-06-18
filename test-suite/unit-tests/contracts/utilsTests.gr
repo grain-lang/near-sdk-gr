@@ -1,0 +1,15 @@
+import Utils from "near/utils"
+import Bytes from "bytes"
+
+export let doLog = () => {
+  Utils.log("foo bar")
+  void
+}
+
+export let doReturnString = () => {
+  Utils.valueReturnString("foo")
+}
+
+export let doReturnBytes = () => {
+  Utils.valueReturnBytes(Bytes.fromString("foobar"))
+}

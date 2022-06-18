@@ -13,3 +13,9 @@ export let doReturnString = () => {
 export let doReturnBytes = () => {
   Utils.valueReturnBytes(Bytes.fromString("foobar"))
 }
+
+export let doPanic = () => Utils.panic()
+
+export let doPanicString = () => {
+  Utils.panicString("aaaaah")
+}

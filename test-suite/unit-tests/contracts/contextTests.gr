@@ -1,0 +1,43 @@
+import Context from "near/context"
+import Utils from "near/utils"
+import Bytes from "bytes"
+
+export let doCurrentAccountId = () => {
+  Utils.valueReturnString(Context.currentAccountId())
+}
+
+export let doSignerAccountId = () => {
+  Utils.valueReturnString(Context.signerAccountId())
+}
+
+export let doSignerAccountPublicKey = () => {
+  Utils.valueReturnBytes(Context.signerAccountPublicKey())
+}
+
+export let doPredecessorAccountId = () => {
+  Utils.valueReturnString(Context.predecessorAccountId())
+}
+
+export let doBlockHeight = () => {
+  Utils.valueReturnString(toString(Context.blockHeight()))
+}
+
+export let doBlockTimestamp = () => {
+  Utils.valueReturnString(toString(Context.blockTimestamp()))
+}
+
+export let doEpochHeight = () => {
+  Utils.valueReturnString(toString(Context.epochHeight()))
+}
+
+export let doStorageUsage = () => {
+  Utils.valueReturnString(toString(Context.storageUsage()))
+}
+
+export let doInputBytes = () => {
+  Utils.valueReturnBytes(Context.inputBytes())
+}
+
+export let doInputStringUnsafe = () => {
+  Utils.valueReturnString(Context.inputStringUnsafe())
+}

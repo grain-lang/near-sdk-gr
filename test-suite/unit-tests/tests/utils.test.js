@@ -22,4 +22,23 @@ test("returnString", async t => {
   const res = await root.call(contract, "doReturnString", {});
   t.deepEqual(res, "foo");
 })
-// jest.setTimeout(60_000);
+
+test("returnBytes", async t => {
+  const {root, contract} = t.context.accounts
+  const res = await root.call(contract, "doReturnBytes", {});
+  t.deepEqual(res, "foobar");
+})
+
+test("panic", async t => {
+  const {root, contract} = t.context.accounts
+  const res = await root.callRaw(contract, "doPanic", {});
+  t.true(res.failed)
+})
+
+test("panicString", async t => {
+  const {root, contract} = t.context.accounts
+  const res = await root.callRaw(contract, "doPanicString", {});
+  t.true(res.failed)
+  t.deepEqual(res.result.status.Failure.ActionError.kind.FunctionCallError.ExecutionError, "Smart contract panicked: aaaaah")
+})
+

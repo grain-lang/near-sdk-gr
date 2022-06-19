@@ -3,9 +3,9 @@
 import WasmI32 from "runtime/unsafe/wasmi32"
 import WasmI64 from "runtime/unsafe/wasmi64"
 import Native from "./internal/native"
+import Int128 from "./internal/int128"
+import Int256 from "./internal/int256"
 import Register from "./register"
-
-// [TODO] update types of int128/int256 versions of all functions, once support is added
 
 let keyPtr = (s: String) => {
   WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(s), 8n))
@@ -232,8 +232,8 @@ export let setInt64 = (key: String, value: Int64) => {
  *
  * @example Storage.setInt128(Storage.StringKey("foo"), Int128.fromInt64(5L))
  */
-export let setInt128 = (key: String, value: Bytes) => {
-  setBytes(key, value)
+export let setInt128 = (key: String, value: Int128.Int128) => {
+  setBytes(key, Int128.toBytes(value))
 }
 
 /**
@@ -247,8 +247,8 @@ export let setInt128 = (key: String, value: Bytes) => {
  *
  * @example Storage.setInt256(Storage.StringKey("foo"), Int256.fromInt64(5L))
  */
-export let setInt256 = (key: String, value: Bytes) => {
-  setBytes(key, value)
+export let setInt256 = (key: String, value: Int256.Int256) => {
+  setBytes(key, Int256.toBytes(value))
 }
 
 /**
@@ -343,7 +343,7 @@ export let replaceInt64 = (key: String, value: Int64) => {
  *
  * @example Storage.setInt128(Storage.StringKey("foo"), Int128.fromInt64(5L))
  */
-export let replaceInt128 = (key: String, value: Bytes) => {
+export let replaceInt128 = (key: String, value: Int128.Int128) => {
   if (WasmI64.eqz(setStringLike(key, WasmI32.fromGrain(value)))) {
     None
   } else {
@@ -363,7 +363,7 @@ export let replaceInt128 = (key: String, value: Bytes) => {
  *
  * @example Storage.setInt256(Storage.StringKey("foo"), Int256.fromInt64(5L))
  */
-export let replaceInt256 = (key: String, value: Bytes) => {
+export let replaceInt256 = (key: String, value: Int256.Int256) => {
   if (WasmI64.eqz(setStringLike(key, WasmI32.fromGrain(value)))) {
     None
   } else {
@@ -502,6 +502,5 @@ export let popInt256 = (key: String) => {
  * @example Storage.remove(Storage.StringKey("foo"))
  */
 export let remove = (key: String) => {
-  Native.storageRemove(keyLen(key), keyPtr(key), 0N)
-  void
+  !WasmI64.eqz(Native.storageRemove(keyLen(key), keyPtr(key), 0N))
 }

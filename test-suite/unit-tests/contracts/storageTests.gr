@@ -1,0 +1,170 @@
+import Storage from "near/storage"
+import Int128 from "near/internal/int128"
+import Int256 from "near/internal/int256"
+import Utils from "near/utils"
+import Bytes from "bytes"
+import Option from "option"
+
+export let doHasKey = () => {
+  Storage.setString("something", "value")
+  Utils.valueReturnString(
+    toString([Storage.hasKey("somethingMissing"), Storage.hasKey("something")])
+  )
+}
+
+export let doGetString = () => {
+  Storage.setString("something", "value")
+  Utils.valueReturnString(toString(Storage.getString("something")))
+}
+
+export let doGetBytes = () => {
+  Storage.setBytes("something", Bytes.fromString("value"))
+  Utils.valueReturnString(toString(Storage.getBytes("something")))
+}
+
+export let doGetInt32 = () => {
+  Storage.setInt32("something", 5l)
+  Utils.valueReturnString(toString(Storage.getInt32("something")))
+}
+
+export let doGetInt64 = () => {
+  Storage.setInt64("something", 5L)
+  Utils.valueReturnString(toString(Storage.getInt64("something")))
+}
+
+export let doGetInt128 = () => {
+  Storage.setInt128(
+    "something",
+    Int128.fromNumber(6325235235143255235423958942589134194)
+  )
+  Utils.valueReturnString(
+    toString(Option.map(Int128.toNumber, Storage.getInt128("something")))
+  )
+}
+
+export let doGetInt256 = () => {
+  Storage.setInt256(
+    "something",
+    Int256.fromNumber(632523523514325523542395894258913419489213)
+  )
+  Utils.valueReturnString(
+    toString(Option.map(Int256.toNumber, Storage.getInt256("something")))
+  )
+}
+
+export let doReplaceString = () => {
+  Storage.setString("something", "value")
+  Storage.replaceString("something", "othervalue")
+  Utils.valueReturnString(toString(Storage.getString("something")))
+}
+
+export let doReplaceBytes = () => {
+  Storage.setBytes("something", Bytes.fromString("value"))
+  Storage.replaceBytes("something", Bytes.fromString("othervalue"))
+  Utils.valueReturnString(toString(Storage.getBytes("something")))
+}
+
+export let doReplaceInt32 = () => {
+  Storage.setInt32("something", 5l)
+  Storage.replaceInt32("something", 27l)
+  Utils.valueReturnString(toString(Storage.getInt32("something")))
+}
+
+export let doReplaceInt64 = () => {
+  Storage.setInt64("something", 5L)
+  Storage.replaceInt64("something", 27L)
+  Utils.valueReturnString(toString(Storage.getInt64("something")))
+}
+
+export let doReplaceInt128 = () => {
+  Storage.setInt128(
+    "something",
+    Int128.fromNumber(6325235235143255235423958942589134194)
+  )
+  Storage.replaceInt128(
+    "something",
+    Int128.fromNumber(632523523514325523542395894258913)
+  )
+  Utils.valueReturnString(
+    toString(Option.map(Int128.toNumber, Storage.getInt128("something")))
+  )
+}
+
+export let doReplaceInt256 = () => {
+  Storage.setInt256(
+    "something",
+    Int256.fromNumber(632523523514325523542395894258913419489213)
+  )
+  Storage.replaceInt256(
+    "something",
+    Int256.fromNumber(63252352351432552354239589425891341948921332)
+  )
+  Utils.valueReturnString(
+    toString(Option.map(Int256.toNumber, Storage.getInt256("something")))
+  )
+}
+
+export let doPopString = () => {
+  Storage.setString("something", "value")
+  Utils.valueReturnString(
+    toString([Storage.popString("something"), Storage.popString("something")])
+  )
+}
+
+export let doPopBytes = () => {
+  Storage.setBytes("something", Bytes.fromString("value"))
+  Utils.valueReturnString(
+    toString([Storage.popBytes("something"), Storage.popBytes("something")])
+  )
+}
+
+export let doPopInt32 = () => {
+  Storage.setInt32("something", 5l)
+  Utils.valueReturnString(
+    toString([Storage.popInt32("something"), Storage.popInt32("something")])
+  )
+}
+
+export let doPopInt64 = () => {
+  Storage.setInt64("something", 5L)
+  Utils.valueReturnString(
+    toString([Storage.popInt64("something"), Storage.popInt64("something")])
+  )
+}
+
+export let doPopInt128 = () => {
+  Storage.setInt128(
+    "something",
+    Int128.fromNumber(6325235235143255235423958942589134194)
+  )
+  Utils.valueReturnString(
+    toString(
+      [
+        Option.map(Int128.toNumber, Storage.popInt128("something")),
+        Option.map(Int128.toNumber, Storage.popInt128("something")),
+      ]
+    )
+  )
+}
+
+export let doPopInt256 = () => {
+  Storage.setInt256(
+    "something",
+    Int256.fromNumber(632523523514325523542395894258913419489213)
+  )
+  Utils.valueReturnString(
+    toString(
+      [
+        Option.map(Int256.toNumber, Storage.popInt256("something")),
+        Option.map(Int256.toNumber, Storage.popInt256("something")),
+      ]
+    )
+  )
+}
+
+export let doRemove = () => {
+  Storage.setString("something", "value")
+  Utils.valueReturnString(
+    toString([Storage.remove("something"), Storage.remove("something")])
+  )
+}

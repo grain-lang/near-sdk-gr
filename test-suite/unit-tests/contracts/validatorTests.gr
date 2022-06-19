@@ -1,0 +1,17 @@
+import Context from "near/context"
+import Validator from "near/validator"
+import Int128 from "near/internal/int128"
+import Utils from "near/utils"
+import Bytes from "bytes"
+
+export let doStake = () => {
+  Utils.valueReturnString(
+    toString(Int128.toNumber(Validator.stake(Context.inputStringUnsafe())))
+  )
+}
+
+export let doTotalStake = () => {
+  Utils.valueReturnString(
+    "\"" ++ toString(Int128.toNumber(Validator.totalStake())) ++ "\""
+  )
+}

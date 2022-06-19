@@ -1,4 +1,5 @@
 /* grainc-flags --no-gc */
+import Option from "option"
 import WasmI32 from "runtime/unsafe/wasmi32"
 import WasmI64 from "runtime/unsafe/wasmi64"
 import Native from "./internal/native"
@@ -34,7 +35,7 @@ export let hashBytes = (alg, value: Bytes) => {
   let ptr = WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(value), 8n))
   let len = WasmI64.load32U(WasmI32.fromGrain(value), 4n)
   performHash(alg, len, ptr, 0N)
-  Register.readBytes(0L)
+  Option.unwrap(Register.readBytes(0L))
 }
 
 /**
@@ -51,5 +52,5 @@ export let hashString = (alg, value: String) => {
   let ptr = WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(value), 8n))
   let len = WasmI64.load32U(WasmI32.fromGrain(value), 4n)
   performHash(alg, len, ptr, 0N)
-  Register.readBytes(0L)
+  Option.unwrap(Register.readBytes(0L))
 }

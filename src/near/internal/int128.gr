@@ -27,7 +27,6 @@ export let fromInt64 = n => {
   ret: Int128
 }
 
-@unsafe
 export let toNumber = (n: Int128) => {
   let limb0 = Bytes.getInt64(0, n)
   let limb1 = Bytes.getInt64(8, n)
@@ -52,7 +51,6 @@ export let toNumber = (n: Int128) => {
   }
 }
 
-@unsafe
 export let fromNumber = n => {
   if (Number.abs(n) <= 0x7FFFFFFFFFFFFFFF) {
     fromInt64(Int64.fromNumber(n))

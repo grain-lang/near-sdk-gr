@@ -27,7 +27,8 @@ test("signerAccountPublicKey", async t => {
   const {root, contract} = t.context.accounts
   const res = await root.callRaw(contract, "doSignerAccountPublicKey", {})
   const pubkey = (await root.getKey()).getPublicKey().data
-  const bufu8 = resultToUInt8Array(res.result)
+  // [TODO] determine if this slice is needed due to the semantics of signerPublicKey or if there's some type of bug
+  const bufu8 = resultToUInt8Array(res.result).slice(1)
   t.deepEqual(bufu8, pubkey)
 })
 

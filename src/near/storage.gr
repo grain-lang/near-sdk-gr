@@ -42,7 +42,7 @@ export let getString = (key: String) => {
   if (WasmI64.eqz(res)) {
     None
   } else {
-    Some(Register.readString(0L))
+    Register.readString(0L)
   }
 }
 
@@ -61,7 +61,7 @@ export let getBytes = (key: String) => {
   if (WasmI64.eqz(res)) {
     None
   } else {
-    Some(Register.readBytes(0L))
+    Register.readBytes(0L)
   }
 }
 
@@ -80,7 +80,7 @@ export let getInt32 = (key: String) => {
   if (WasmI64.eqz(res)) {
     None
   } else {
-    Some(Register.readInt32(0L))
+    Register.readInt32(0L)
   }
 }
 
@@ -99,7 +99,7 @@ export let getInt64 = (key: String) => {
   if (WasmI64.eqz(res)) {
     None
   } else {
-    Some(Register.readInt64(0L))
+    Register.readInt64(0L)
   }
 }
 
@@ -118,7 +118,7 @@ export let getInt128 = (key: String) => {
   if (WasmI64.eqz(res)) {
     None
   } else {
-    Some(Register.readInt128(0L))
+    Register.readInt128(0L)
   }
 }
 
@@ -137,7 +137,7 @@ export let getInt256 = (key: String) => {
   if (WasmI64.eqz(res)) {
     None
   } else {
-    Some(Register.readInt256(0L))
+    Register.readInt256(0L)
   }
 }
 
@@ -267,7 +267,7 @@ export let replaceString = (key: String, value: String) => {
   if (WasmI64.eqz(setStringLike(key, WasmI32.fromGrain(value)))) {
     None
   } else {
-    Some(Register.readString(0L))
+    Register.readString(0L)
   }
 }
 
@@ -287,7 +287,7 @@ export let replaceBytes = (key: String, value: Bytes) => {
   if (WasmI64.eqz(setStringLike(key, WasmI32.fromGrain(value)))) {
     None
   } else {
-    Some(Register.readBytes(0L))
+    Register.readBytes(0L)
   }
 }
 
@@ -307,7 +307,7 @@ export let replaceInt32 = (key: String, value: Int32) => {
   if (WasmI64.eqz(setFixnum(key, WasmI32.fromGrain(value), 4N))) {
     None
   } else {
-    Some(Register.readInt32(0L))
+    Register.readInt32(0L)
   }
 }
 
@@ -327,7 +327,7 @@ export let replaceInt64 = (key: String, value: Int64) => {
   if (WasmI64.eqz(setFixnum(key, WasmI32.fromGrain(value), 8N))) {
     None
   } else {
-    Some(Register.readInt64(0L))
+    Register.readInt64(0L)
   }
 }
 
@@ -347,7 +347,7 @@ export let replaceInt128 = (key: String, value: Bytes) => {
   if (WasmI64.eqz(setStringLike(key, WasmI32.fromGrain(value)))) {
     None
   } else {
-    Some(Register.readInt128(0L))
+    Register.readInt128(0L)
   }
 }
 
@@ -367,7 +367,7 @@ export let replaceInt256 = (key: String, value: Bytes) => {
   if (WasmI64.eqz(setStringLike(key, WasmI32.fromGrain(value)))) {
     None
   } else {
-    Some(Register.readInt256(0L))
+    Register.readInt256(0L)
   }
 }
 
@@ -387,7 +387,7 @@ export let popString = (key: String) => {
   if (WasmI64.eqz(res)) {
     None
   } else {
-    Some(Register.readString(0L))
+    Register.readString(0L)
   }
 }
 
@@ -407,7 +407,7 @@ export let popBytes = (key: String) => {
   if (WasmI64.eqz(res)) {
     None
   } else {
-    Some(Register.readBytes(0L))
+    Register.readBytes(0L)
   }
 }
 
@@ -427,7 +427,7 @@ export let popInt32 = (key: String) => {
   if (WasmI64.eqz(res)) {
     None
   } else {
-    Some(Register.readInt32(0L))
+    Register.readInt32(0L)
   }
 }
 
@@ -447,7 +447,7 @@ export let popInt64 = (key: String) => {
   if (WasmI64.eqz(res)) {
     None
   } else {
-    Some(Register.readInt64(0L))
+    Register.readInt64(0L)
   }
 }
 
@@ -467,7 +467,7 @@ export let popInt128 = (key: String) => {
   if (WasmI64.eqz(res)) {
     None
   } else {
-    Some(Register.readInt128(0L))
+    Register.readInt128(0L)
   }
 }
 
@@ -487,7 +487,7 @@ export let popInt256 = (key: String) => {
   if (WasmI64.eqz(res)) {
     None
   } else {
-    Some(Register.readInt256(0L))
+    Register.readInt256(0L)
   }
 }
 

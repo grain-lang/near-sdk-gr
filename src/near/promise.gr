@@ -9,6 +9,7 @@ import Array from "array"
 import String from "string"
 import Buffer from "buffer"
 import Int64 from "int64"
+import Option from "option"
 
 record Promise {
   index: Int64,
@@ -498,7 +499,7 @@ export let checkResult = (resultIdx: Int64) => {
  */
 export let getResultBytes = (resultIdx: Int64) => {
   match (checkResult(resultIdx)) {
-    Some(true) => Some(Ok(Register.readBytes(0L))),
+    Some(true) => Some(Ok(Option.unwrap(Register.readBytes(0L)))),
     Some(_) => Some(Err("Promise failed")),
     None => None,
   }
@@ -517,7 +518,7 @@ export let getResultBytes = (resultIdx: Int64) => {
  */
 export let getResultString = (resultIdx: Int64) => {
   match (checkResult(resultIdx)) {
-    Some(true) => Some(Ok(Register.readString(0L))),
+    Some(true) => Some(Ok(Option.unwrap(Register.readString(0L)))),
     Some(_) => Some(Err("Promise failed")),
     None => None,
   }
@@ -536,7 +537,7 @@ export let getResultString = (resultIdx: Int64) => {
  */
 export let getResultInt32 = (resultIdx: Int64) => {
   match (checkResult(resultIdx)) {
-    Some(true) => Some(Ok(Register.readInt32(0L))),
+    Some(true) => Some(Ok(Option.unwrap(Register.readInt32(0L)))),
     Some(_) => Some(Err("Promise failed")),
     None => None,
   }
@@ -555,7 +556,7 @@ export let getResultInt32 = (resultIdx: Int64) => {
  */
 export let getResultInt64 = (resultIdx: Int64) => {
   match (checkResult(resultIdx)) {
-    Some(true) => Some(Ok(Register.readInt64(0L))),
+    Some(true) => Some(Ok(Option.unwrap(Register.readInt64(0L)))),
     Some(_) => Some(Err("Promise failed")),
     None => None,
   }
@@ -574,7 +575,7 @@ export let getResultInt64 = (resultIdx: Int64) => {
  */
 export let getResultInt128 = (resultIdx: Int64) => {
   match (checkResult(resultIdx)) {
-    Some(true) => Some(Ok(Register.readInt128(0L))),
+    Some(true) => Some(Ok(Option.unwrap(Register.readInt128(0L)))),
     Some(_) => Some(Err("Promise failed")),
     None => None,
   }
@@ -593,7 +594,7 @@ export let getResultInt128 = (resultIdx: Int64) => {
  */
 export let getResultInt256 = (resultIdx: Int64) => {
   match (checkResult(resultIdx)) {
-    Some(true) => Some(Ok(Register.readInt256(0L))),
+    Some(true) => Some(Ok(Option.unwrap(Register.readInt256(0L)))),
     Some(_) => Some(Err("Promise failed")),
     None => None,
   }

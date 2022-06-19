@@ -27,6 +27,5 @@ module.exports.teardownWorker = async t => {
 
 module.exports.resultToUInt8Array = res => {
   const buf = Buffer.from(res.status.SuccessValue, 'base64')
-  // [TODO] determine if this is because of a bug in our readRegister or just the semantics of signerPublicKey
-  return Uint8Array.of(...buf.toJSON()["data"].slice(1))
+  return Uint8Array.of(...buf.toJSON()["data"])
 }

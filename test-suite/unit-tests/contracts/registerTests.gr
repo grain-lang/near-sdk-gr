@@ -1,0 +1,46 @@
+import Int128 from "near/internal/int128"
+import Int256 from "near/internal/int256"
+import Register from "near/register"
+import Utils from "near/utils"
+import Bytes from "bytes"
+import Option from "option"
+
+export let doReadString = () => {
+  Register.writeString(0L, "foo bar")
+  Utils.valueReturnString(Option.unwrap(Register.readString(0L)))
+}
+
+export let doReadBytes = () => {
+  Register.writeBytes(0L, Bytes.fromString("foo bar"))
+  Utils.valueReturnBytes(Option.unwrap(Register.readBytes(0L)))
+}
+
+export let doReadInt32 = () => {
+  Register.writeInt32(0L, 643255235l)
+  Utils.valueReturnString(toString(Option.unwrap(Register.readInt32(0L))))
+}
+
+export let doReadInt64 = () => {
+  Register.writeInt64(0L, 6325235235143255235L)
+  Utils.valueReturnString(toString(Option.unwrap(Register.readInt64(0L))))
+}
+
+export let doReadInt128 = () => {
+  Register.writeInt128(
+    0L,
+    Int128.fromNumber(6325235235143255235423958942589134194)
+  )
+  Utils.valueReturnString(
+    toString(Int128.toNumber(Option.unwrap(Register.readInt128(0L))))
+  )
+}
+
+export let doReadInt256 = () => {
+  Register.writeInt256(
+    0L,
+    Int256.fromNumber(632523523514325523542395894258913419489213)
+  )
+  Utils.valueReturnString(
+    toString(Int256.toNumber(Option.unwrap(Register.readInt256(0L))))
+  )
+}

@@ -1,11 +1,16 @@
 /* grainc-flags --no-gc */
 
+import Bytes from "bytes"
+import Int32 from "int32"
+import Int64 from "int64"
+import Option from "option"
 import Native from "./internal/native"
 import Int128 from "./internal/int128"
 import Int256 from "./internal/int256"
 import WasmI32 from "runtime/unsafe/wasmi32"
 import WasmI64 from "runtime/unsafe/wasmi64"
 import Conv from "runtime/unsafe/conv"
+import Const from "runtime/unsafe/constants"
 import {
   allocateString,
   allocateBytes,
@@ -20,7 +25,7 @@ import {
  * Reads the contents of the given register, interpreting
  * the data as a string.
  *
- * Will throw an error if the given register ID is not in use.
+ * Will return `None` if the given register ID is not in use.
  *
  * @param id: The register to read
  * @returns The contents of the given register
@@ -30,16 +35,21 @@ import {
 export let readString = id => {
   let idW = Conv.fromInt64(id)
   let valueLen = Native.registerLen(idW)
-  let value = allocateString(WasmI32.wrapI64(valueLen))
-  Native.readRegister(idW, WasmI64.extendI32U(WasmI32.add(value, 8n)))
-  WasmI32.toGrain(value): String
+  if (WasmI64.eq(valueLen, Const._UMAX_I64)) {
+    // register not in use
+    None
+  } else {
+    let value = allocateString(WasmI32.wrapI64(valueLen))
+    Native.readRegister(idW, WasmI64.extendI32U(WasmI32.add(value, 8n)))
+    Some(WasmI32.toGrain(value): String)
+  }
 }
 
 /**
  * Reads the contents of the given register, interpreting
  * the data as a byte sequence.
  *
- * Will throw an error if the given register ID is not in use.
+ * Will return `None` if the given register ID is not in use.
  *
  * @param id: The register to read
  * @returns The contents of the given register
@@ -49,16 +59,20 @@ export let readString = id => {
 export let readBytes = id => {
   let idW = Conv.fromInt64(id)
   let valueLen = Native.registerLen(idW)
-  let value = allocateBytes(WasmI32.wrapI64(valueLen))
-  Native.readRegister(idW, WasmI64.extendI32U(WasmI32.add(value, 8n)))
-  WasmI32.toGrain(value): Bytes
+  if (WasmI64.eq(valueLen, Const._UMAX_I64)) {
+    None
+  } else {
+    let value = allocateBytes(WasmI32.wrapI64(valueLen))
+    Native.readRegister(idW, WasmI64.extendI32U(WasmI32.add(value, 8n)))
+    Some(WasmI32.toGrain(value): Bytes)
+  }
 }
 
 /**
  * Reads the contents of the given register, interpreting
  * the data as a 32-bit integer.
  *
- * Will throw an error if the given register ID is not in use.
+ * Will return `None` if the given register ID is not in use.
  *
  * @param id: The register to read
  * @returns The contents of the given register
@@ -68,17 +82,21 @@ export let readBytes = id => {
 export let readInt32 = id => {
   let idW = Conv.fromInt64(id)
   let valueLen = Native.registerLen(idW)
-  assert WasmI64.eq(valueLen, 4N)
-  let value = allocateInt32()
-  Native.readRegister(idW, WasmI64.extendI32U(WasmI32.add(value, 8n)))
-  WasmI32.toGrain(value): Int32
+  if (WasmI64.eq(valueLen, Const._UMAX_I64)) {
+    None
+  } else {
+    assert WasmI64.eq(valueLen, 4N)
+    let value = allocateInt32()
+    Native.readRegister(idW, WasmI64.extendI32U(WasmI32.add(value, 8n)))
+    Some(WasmI32.toGrain(value): Int32)
+  }
 }
 
 /**
  * Reads the contents of the given register, interpreting
  * the data as a 64-bit integer.
  *
- * Will throw an error if the given register ID is not in use.
+ * Will return `None` if the given register ID is not in use.
  *
  * @param id: The register to read
  * @returns The contents of the given register
@@ -88,19 +106,21 @@ export let readInt32 = id => {
 export let readInt64 = id => {
   let idW = Conv.fromInt64(id)
   let valueLen = Native.registerLen(idW)
-  assert WasmI64.eq(valueLen, 8N)
-  let value = allocateInt64()
-  Native.readRegister(idW, WasmI64.extendI32U(WasmI32.add(value, 8n)))
-  WasmI32.toGrain(value): Int64
+  if (WasmI64.eq(valueLen, Const._UMAX_I64)) {
+    None
+  } else {
+    assert WasmI64.eq(valueLen, 8N)
+    let value = allocateInt64()
+    Native.readRegister(idW, WasmI64.extendI32U(WasmI32.add(value, 8n)))
+    Some(WasmI32.toGrain(value): Int64)
+  }
 }
-
-// [TODO] migrate to actual int128/int256 types when available
 
 /**
  * Reads the contents of the given register, interpreting
  * the data as a 128-bit integer.
  *
- * Will throw an error if the given register ID is not in use.
+ * Will return `None` if the given register ID is not in use.
  *
  * @param id: The register to read
  * @returns The contents of the given register
@@ -110,17 +130,21 @@ export let readInt64 = id => {
 export let readInt128 = id => {
   let idW = Conv.fromInt64(id)
   let valueLen = Native.registerLen(idW)
-  assert WasmI64.eq(valueLen, 16N)
-  let value = WasmI32.fromGrain(Int128.allocate())
-  Native.readRegister(idW, WasmI64.extendI32U(WasmI32.add(value, 8n)))
-  Int128.fromBytes(WasmI32.toGrain(value))
+  if (WasmI64.eq(valueLen, Const._UMAX_I64)) {
+    None
+  } else {
+    assert WasmI64.eq(valueLen, 16N)
+    let value = WasmI32.fromGrain(Int128.allocate())
+    Native.readRegister(idW, WasmI64.extendI32U(WasmI32.add(value, 8n)))
+    Some(Int128.fromBytes(WasmI32.toGrain(value)))
+  }
 }
 
 /**
  * Reads the contents of the given register, interpreting
  * the data as a 256-bit integer.
  *
- * Will throw an error if the given register ID is not in use.
+ * Will return `None` if the given register ID is not in use.
  *
  * @param id: The register to read
  * @returns The contents of the given register
@@ -130,8 +154,95 @@ export let readInt128 = id => {
 export let readInt256 = id => {
   let idW = Conv.fromInt64(id)
   let valueLen = Native.registerLen(idW)
-  assert WasmI64.eq(valueLen, 32N)
-  let value = WasmI32.fromGrain(Int256.allocate())
-  Native.readRegister(idW, WasmI64.extendI32U(WasmI32.add(value, 8n)))
-  Int256.fromBytes(WasmI32.toGrain(value))
+  if (WasmI64.eq(valueLen, Const._UMAX_I64)) {
+    None
+  } else {
+    assert WasmI64.eq(valueLen, 32N)
+    let value = WasmI32.fromGrain(Int256.allocate())
+    Native.readRegister(idW, WasmI64.extendI32U(WasmI32.add(value, 8n)))
+    Some(Int256.fromBytes(WasmI32.toGrain(value)))
+  }
+}
+
+/**
+ * Writes the given byte sequence to the given register.
+ *
+ * @param id: The register to write to
+ * @param data: The data to write to the given register
+ *
+ * @example Register.writeBytes(0L, Bytes.fromString("foo bar"))
+ */
+export let writeBytes = (id, b) => {
+  let idW = Conv.fromInt64(id)
+  let numBytes = WasmI64.extendI32U(
+    Conv.fromInt32(Int32.fromNumber(Bytes.length(b)))
+  )
+  let bytesptr = WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(b), 8n))
+  Native.writeRegister(idW, numBytes, bytesptr)
+}
+
+/**
+ * Writes the given string to the given register.
+ *
+ * @param id: The register to write to
+ * @param data: The data to write to the given register
+ *
+ * @example Register.writeString(0L, "foo bar")
+ */
+export let writeString = (id, data: String) => {
+  writeBytes(id, Bytes.fromString(data))
+}
+
+/**
+ * Writes the given integer to the given register.
+ *
+ * @param id: The register to write to
+ * @param data: The data to write to the given register
+ *
+ * @example Register.writeInt32(0L, 29l)
+ */
+export let writeInt32 = (id, data: Int32) => {
+  let idW = Conv.fromInt64(id)
+  let numBytes = 4N
+  let ptr = WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(data), 8n))
+  Native.writeRegister(idW, numBytes, ptr)
+}
+
+/**
+ * Writes the given integer to the given register.
+ *
+ * @param id: The register to write to
+ * @param data: The data to write to the given register
+ *
+ * @example Register.writeInt64(0L, 57L)
+ */
+export let writeInt64 = (id, data: Int64) => {
+  let idW = Conv.fromInt64(id)
+  let numBytes = 8N
+  let ptr = WasmI64.extendI32U(WasmI32.add(WasmI32.fromGrain(data), 8n))
+  Native.writeRegister(idW, numBytes, ptr)
+}
+
+/**
+ * Writes the given integer to the given register.
+ *
+ * @param id: The register to write to
+ * @param data: The data to write to the given register
+ *
+ * @example Register.writeInt128(0L, myint)
+ */
+export let writeInt128 = (id, data: Int128.Int128) => {
+  writeBytes(id, Int128.toBytes(data))
+}
+
+/**
+ * Writes the given integer to the given register.
+ *
+ * @param id: The register to write to
+ * @param data: The data to write to the given register
+ *
+ * @example Register.writeInt256(0L, myint)
+ */
+export let writeInt256 = (id, data: Int256.Int256) => {
+  writeBytes(id, Int256.toBytes(data))
 }

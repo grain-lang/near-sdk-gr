@@ -1,6 +1,5 @@
 const anyTest = require("ava");
-const { NEAR } = require("near-workspaces");
-const { setupWorker, teardownWorker, resultToUInt8Array } = require("./testUtils");
+const { setupWorker, teardownWorker } = require("./testUtils");
 
 const test = anyTest;
 

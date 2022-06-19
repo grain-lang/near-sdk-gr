@@ -1,0 +1,44 @@
+import Math from "near/math"
+import Int128 from "near/internal/int128"
+import Utils from "near/utils"
+import Bytes from "bytes"
+
+export let doHashBytesSHA256 = () => {
+  Utils.valueReturnBytes(
+    Math.hashBytes(Math.SHA256, Bytes.fromString("foo bar"))
+  )
+}
+
+export let doHashBytesKECCAK256 = () => {
+  Utils.valueReturnBytes(
+    Math.hashBytes(Math.KECCAK256, Bytes.fromString("foo bar"))
+  )
+}
+
+export let doHashBytesKECCAK512 = () => {
+  Utils.valueReturnBytes(
+    Math.hashBytes(Math.KECCAK512, Bytes.fromString("foo bar"))
+  )
+}
+
+export let doHashBytesRIPEMD160 = () => {
+  Utils.valueReturnBytes(
+    Math.hashBytes(Math.RIPEMD160, Bytes.fromString("foo bar"))
+  )
+}
+
+export let doHashStringSHA256 = () => {
+  Utils.valueReturnBytes(Math.hashString(Math.SHA256, "foo bar"))
+}
+
+export let doHashStringKECCAK256 = () => {
+  Utils.valueReturnBytes(Math.hashString(Math.KECCAK256, "foo bar"))
+}
+
+export let doHashStringKECCAK512 = () => {
+  Utils.valueReturnBytes(Math.hashString(Math.KECCAK512, "foo bar"))
+}
+
+export let doHashStringRIPEMD160 = () => {
+  Utils.valueReturnBytes(Math.hashString(Math.RIPEMD160, "foo bar"))
+}

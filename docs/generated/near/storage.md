@@ -311,7 +311,7 @@ Storage.setInt64(Storage.StringKey("foo"), 42L)
 ### Storage.**setInt128**
 
 ```grain
-setInt128 : (String, Bytes) -> Void
+setInt128 : (String, Int128.Int128) -> Void
 ```
 
 Associates the given key in storage with the given 128-bit integer.
@@ -323,7 +323,7 @@ Parameters:
 |param|type|description|
 |-----|----|-----------|
 |`key`|`String`|The key to store|
-|`value`|`Bytes`|The value to store|
+|`value`|`Int128.Int128`|The value to store|
 
 Returns:
 
@@ -340,7 +340,7 @@ Storage.setInt128(Storage.StringKey("foo"), Int128.fromInt64(5L))
 ### Storage.**setInt256**
 
 ```grain
-setInt256 : (String, Bytes) -> Void
+setInt256 : (String, Int256.Int256) -> Void
 ```
 
 Associates the given key in storage with the given 256-bit integer.
@@ -352,7 +352,7 @@ Parameters:
 |param|type|description|
 |-----|----|-----------|
 |`key`|`String`|The key to store|
-|`value`|`Bytes`|The value to store|
+|`value`|`Int256.Int256`|The value to store|
 
 Returns:
 
@@ -489,7 +489,7 @@ Storage.setInt64(Storage.StringKey("foo"), 42L)
 ### Storage.**replaceInt128**
 
 ```grain
-replaceInt128 : (String, Bytes) -> Option<Int128.Int128>
+replaceInt128 : (String, Int128.Int128) -> Option<Int128.Int128>
 ```
 
 Associates the given key in storage with the given 128-bit integer,
@@ -502,7 +502,7 @@ Parameters:
 |param|type|description|
 |-----|----|-----------|
 |`key`|`String`|The key to store|
-|`value`|`Bytes`|The value to store|
+|`value`|`Int128.Int128`|The value to store|
 
 Returns:
 
@@ -519,7 +519,7 @@ Storage.setInt128(Storage.StringKey("foo"), Int128.fromInt64(5L))
 ### Storage.**replaceInt256**
 
 ```grain
-replaceInt256 : (String, Bytes) -> Option<Int256.Int256>
+replaceInt256 : (String, Int256.Int256) -> Option<Int256.Int256>
 ```
 
 Associates the given key in storage with the given 256-bit integer,
@@ -532,7 +532,7 @@ Parameters:
 |param|type|description|
 |-----|----|-----------|
 |`key`|`String`|The key to store|
-|`value`|`Bytes`|The value to store|
+|`value`|`Int256.Int256`|The value to store|
 
 Returns:
 
@@ -723,7 +723,7 @@ Storage.popInt256(Storage.StringKey("foo"))
 ### Storage.**remove**
 
 ```grain
-remove : String -> Void
+remove : String -> Bool
 ```
 
 Removes any storage entry associated with the given key.
@@ -740,7 +740,7 @@ Returns:
 
 |type|description|
 |----|-----------|
-|`Void`|Whether this operation removed data from storage|
+|`Bool`|Whether this operation removed data from storage|
 
 Examples:
 

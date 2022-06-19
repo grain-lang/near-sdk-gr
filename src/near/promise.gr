@@ -19,11 +19,15 @@ record Promise {
 // arguments is a JSON-formatted string: (https://github.com/near/nearcore/blob/a20c12ec02d7f22550139da38838efd1fba75ede/runtime/near-vm-logic/src/logic.rs#L578)
 
 /**
+ * @section Basic Functionality: Basic constructors and operations for Promises
+ */
+
+/**
  * Creates a promise that will execute a method on account with given arguments and attaches the given amount.
  *
  * @param accountId: The account to call the function on
  * @param methodName: The function to call
- * @param arguments: The arguments to the function (a JSON-formatteds tring)
+ * @param arguments: The arguments to the function (a JSON-formatted string)
  * @param amount: The amount to attach to the function call (a 128-bit integer)
  * @param gas: The amount of gas to attach to the function call
  * @returns The new promise

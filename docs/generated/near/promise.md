@@ -1,3 +1,77 @@
+## Basic Functionality
+
+Basic constructors and operations for Promises
+
+### Promise.**create**
+
+```grain
+create : (String, String, String, Int128.Int128, Int64) -> Promise
+```
+
+Creates a promise that will execute a method on account with given arguments and attaches the given amount.
+
+Parameters:
+
+|param|type|description|
+|-----|----|-----------|
+|`accountId`|`String`|The account to call the function on|
+|`methodName`|`String`|The function to call|
+|`arguments`|`String`|The arguments to the function (a JSON-formatted string)|
+|`amount`|`Int128.Int128`|The amount to attach to the function call (a 128-bit integer)|
+|`gas`|`Int64`|The amount of gas to attach to the function call|
+
+Returns:
+
+|type|description|
+|----|-----------|
+|`Promise`|The new promise|
+
+### Promise.**then**
+
+```grain
+then : (Promise, String, String, Bytes, Int128.Int128, Int64) -> Promise
+```
+
+Creates a new promise towards given `account_id` without any actions attached, that is
+executed after the given promise is complete.
+
+Parameters:
+
+|param|type|description|
+|-----|----|-----------|
+|`promise`|`Promise`|The promise to append the action to|
+|`accountId`|`String`|The account to call the function on|
+|`methodName`|`String`|The function to call|
+|`arguments`|`Bytes`|The arguments to the function (a JSON-formatteds tring)|
+|`amount`|`Int128.Int128`|The amount to attach to the function call (a 128-bit integer)|
+|`gas`|`Int64`|The amount of gas to attach to the function call|
+
+Returns:
+
+|type|description|
+|----|-----------|
+|`Promise`|The new promise|
+
+### Promise.**and**
+
+```grain
+and : Array<Promise> -> Promise
+```
+
+Creates a new promise which completes when time all promises passed as arguments complete.
+
+Parameters:
+
+|param|type|description|
+|-----|----|-----------|
+|`promises`|`Array<Promise>`|The array of promises that need to be waited on jointly.|
+
+Returns:
+
+|type|description|
+|----|-----------|
+|`Promise`|The new promise|
+
 ## Batched Actions
 
 For more information, see https://github.com/nearprotocol/NEPs/pull/8/files#diff-15b6752ec7d78e7b85b8c7de4a19cbd4R48

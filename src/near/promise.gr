@@ -145,6 +145,22 @@ export let and = (promises: Array<Promise>) => {
 }
 
 /**
+ * Returns the underlying callback index for the given promise.
+ *
+ * @param promise: The promise whose index to return
+ * @returns The index
+ */
+export let index = promise => promise.index
+
+/**
+ * Constructs a promise instance from the given callback index.
+ *
+ * @param promiseIndex: The promise index to wrap
+ * @returns The promise object
+ */
+export let fromIndex = promiseIndex => { index: promiseIndex, }
+
+/**
  * @section Batched Actions: For more information, see https://github.com/nearprotocol/NEPs/pull/8/files#diff-15b6752ec7d78e7b85b8c7de4a19cbd4R48
  */
 
@@ -476,10 +492,11 @@ export let resultsCount = () => {
  * - If promise result is complete and successful copies its blob into register 0;
  * - If promise result is complete and failed or incomplete keeps register 0 unused;
  *
- * @param resultIdx: The callback whose result to load
+ * @param promise: The promise whose result to load
  * @returns `None` if the promise has not completed, or `Some(flag)` if it has (where `flag` is `true` if the promise succeeded)
  */
-export let checkResult = (resultIdx: Int64) => {
+export let checkResult = (promise: Promise) => {
+  let { index: resultIdx } = promise
   let res = Native.promiseResult(Conv.fromInt64(resultIdx), 0N)
   if (WasmI64.eqz(res)) {
     None
@@ -498,11 +515,11 @@ export let checkResult = (resultIdx: Int64) => {
  * - If promise result is complete and successful copies its blob into the register;
  * - If promise result is complete and failed or incomplete keeps register unused;
  *
- * @param resultIdx: The callback whose result to load
+ * @param promise: The promise whose result to load
  * @returns `None` if the promise has not completed, or `Some(Ok(result))` if it has successfully, or `Some(Err(msg))` if it has failed
  */
-export let getResultBytes = (resultIdx: Int64) => {
-  match (checkResult(resultIdx)) {
+export let getResultBytes = (promise: Promise) => {
+  match (checkResult(promise)) {
     Some(true) => Some(Ok(Option.unwrap(Register.readBytes(0L)))),
     Some(_) => Some(Err("Promise failed")),
     None => None,
@@ -517,11 +534,11 @@ export let getResultBytes = (resultIdx: Int64) => {
  * - If promise result is complete and successful copies its blob into the register;
  * - If promise result is complete and failed or incomplete keeps register unused;
  *
- * @param resultIdx: The callback whose result to load
+ * @param promise: The promise whose result to load
  * @returns `None` if the promise has not completed, or `Some(Ok(result))` if it has successfully, or `Some(Err(msg))` if it has failed
  */
-export let getResultString = (resultIdx: Int64) => {
-  match (checkResult(resultIdx)) {
+export let getResultString = (promise: Promise) => {
+  match (checkResult(promise)) {
     Some(true) => Some(Ok(Option.unwrap(Register.readString(0L)))),
     Some(_) => Some(Err("Promise failed")),
     None => None,
@@ -536,11 +553,11 @@ export let getResultString = (resultIdx: Int64) => {
  * - If promise result is complete and successful copies its blob into the register;
  * - If promise result is complete and failed or incomplete keeps register unused;
  *
- * @param resultIdx: The callback whose result to load
+ * @param promise: The promise whose result to load
  * @returns `None` if the promise has not completed, or `Some(Ok(result))` if it has successfully, or `Some(Err(msg))` if it has failed
  */
-export let getResultInt32 = (resultIdx: Int64) => {
-  match (checkResult(resultIdx)) {
+export let getResultInt32 = (promise: Promise) => {
+  match (checkResult(promise)) {
     Some(true) => Some(Ok(Option.unwrap(Register.readInt32(0L)))),
     Some(_) => Some(Err("Promise failed")),
     None => None,
@@ -555,11 +572,11 @@ export let getResultInt32 = (resultIdx: Int64) => {
  * - If promise result is complete and successful copies its blob into the register;
  * - If promise result is complete and failed or incomplete keeps register unused;
  *
- * @param resultIdx: The callback whose result to load
+ * @param promise: The promise whose result to load
  * @returns `None` if the promise has not completed, or `Some(Ok(result))` if it has successfully, or `Some(Err(msg))` if it has failed
  */
-export let getResultInt64 = (resultIdx: Int64) => {
-  match (checkResult(resultIdx)) {
+export let getResultInt64 = (promise: Promise) => {
+  match (checkResult(promise)) {
     Some(true) => Some(Ok(Option.unwrap(Register.readInt64(0L)))),
     Some(_) => Some(Err("Promise failed")),
     None => None,
@@ -574,11 +591,11 @@ export let getResultInt64 = (resultIdx: Int64) => {
  * - If promise result is complete and successful copies its blob into the register;
  * - If promise result is complete and failed or incomplete keeps register unused;
  *
- * @param resultIdx: The callback whose result to load
+ * @param promise: The promise whose result to load
  * @returns `None` if the promise has not completed, or `Some(Ok(result))` if it has successfully, or `Some(Err(msg))` if it has failed
  */
-export let getResultInt128 = (resultIdx: Int64) => {
-  match (checkResult(resultIdx)) {
+export let getResultInt128 = (promise: Promise) => {
+  match (checkResult(promise)) {
     Some(true) => Some(Ok(Option.unwrap(Register.readInt128(0L)))),
     Some(_) => Some(Err("Promise failed")),
     None => None,
@@ -593,11 +610,11 @@ export let getResultInt128 = (resultIdx: Int64) => {
  * - If promise result is complete and successful copies its blob into the register;
  * - If promise result is complete and failed or incomplete keeps register unused;
  *
- * @param resultIdx: The callback whose result to load
+ * @param promise: The promise whose result to load
  * @returns `None` if the promise has not completed, or `Some(Ok(result))` if it has successfully, or `Some(Err(msg))` if it has failed
  */
-export let getResultInt256 = (resultIdx: Int64) => {
-  match (checkResult(resultIdx)) {
+export let getResultInt256 = (promise: Promise) => {
+  match (checkResult(promise)) {
     Some(true) => Some(Ok(Option.unwrap(Register.readInt256(0L)))),
     Some(_) => Some(Err("Promise failed")),
     None => None,
@@ -609,7 +626,7 @@ export let getResultInt256 = (resultIdx: Int64) => {
  *
  * @param promise: The promise whose result to return
  */
-let promiseReturn = promise => {
+export let promiseReturn = promise => {
   let { index } = promise
   Native.promiseReturn(Conv.fromInt64(index))
 }

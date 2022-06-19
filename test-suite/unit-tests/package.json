@@ -3,7 +3,6 @@
   "version": "0.0.1",
   "description": "",
   "scripts": {
-    "buildOld": "node script/grainfind.js compile contracts/utilsTests.gr && node script/grainfind.js compile contracts/wasiTests.gr",
     "build": "glob-exec --foreach \"contracts/*.gr\" -- \"node script/grainfind.js compile {{file}}\"",
     "pretest": "npm run clean && npm run build",
     "test": "ava",

@@ -72,6 +72,46 @@ Returns:
 |----|-----------|
 |`Promise`|The new promise|
 
+### Promise.**index**
+
+```grain
+index : Promise -> Int64
+```
+
+Returns the underlying callback index for the given promise.
+
+Parameters:
+
+|param|type|description|
+|-----|----|-----------|
+|`promise`|`Promise`|The promise whose index to return|
+
+Returns:
+
+|type|description|
+|----|-----------|
+|`Int64`|The index|
+
+### Promise.**fromIndex**
+
+```grain
+fromIndex : Int64 -> Promise
+```
+
+Constructs a promise instance from the given callback index.
+
+Parameters:
+
+|param|type|description|
+|-----|----|-----------|
+|`promiseIndex`|`Int64`|The promise index to wrap|
+
+Returns:
+
+|type|description|
+|----|-----------|
+|`Promise`|The promise object|
+
 ## Batched Actions
 
 For more information, see https://github.com/nearprotocol/NEPs/pull/8/files#diff-15b6752ec7d78e7b85b8c7de4a19cbd4R48
@@ -313,7 +353,7 @@ Note, there will only be incomplete callbacks once there is an `or` combinator.
 ### Promise.**checkResult**
 
 ```grain
-checkResult : Int64 -> Option<Bool>
+checkResult : Promise -> Option<Bool>
 ```
 
 If the current function is invoked by a callback we can access the execution results of the
@@ -327,7 +367,7 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`resultIdx`|`Int64`|The callback whose result to load|
+|`promise`|`Promise`|The promise whose result to load|
 
 Returns:
 
@@ -338,7 +378,7 @@ Returns:
 ### Promise.**getResultBytes**
 
 ```grain
-getResultBytes : Int64 -> Option<Result<Bytes, String>>
+getResultBytes : Promise -> Option<Result<Bytes, String>>
 ```
 
 If the current function is invoked by a callback we can access the execution results of the
@@ -352,7 +392,7 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`resultIdx`|`Int64`|The callback whose result to load|
+|`promise`|`Promise`|The promise whose result to load|
 
 Returns:
 
@@ -363,7 +403,7 @@ Returns:
 ### Promise.**getResultString**
 
 ```grain
-getResultString : Int64 -> Option<Result<String, String>>
+getResultString : Promise -> Option<Result<String, String>>
 ```
 
 If the current function is invoked by a callback we can access the execution results of the
@@ -377,7 +417,7 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`resultIdx`|`Int64`|The callback whose result to load|
+|`promise`|`Promise`|The promise whose result to load|
 
 Returns:
 
@@ -388,7 +428,7 @@ Returns:
 ### Promise.**getResultInt32**
 
 ```grain
-getResultInt32 : Int64 -> Option<Result<Int32, String>>
+getResultInt32 : Promise -> Option<Result<Int32, String>>
 ```
 
 If the current function is invoked by a callback we can access the execution results of the
@@ -402,7 +442,7 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`resultIdx`|`Int64`|The callback whose result to load|
+|`promise`|`Promise`|The promise whose result to load|
 
 Returns:
 
@@ -413,7 +453,7 @@ Returns:
 ### Promise.**getResultInt64**
 
 ```grain
-getResultInt64 : Int64 -> Option<Result<Int64, String>>
+getResultInt64 : Promise -> Option<Result<Int64, String>>
 ```
 
 If the current function is invoked by a callback we can access the execution results of the
@@ -427,7 +467,7 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`resultIdx`|`Int64`|The callback whose result to load|
+|`promise`|`Promise`|The promise whose result to load|
 
 Returns:
 
@@ -438,7 +478,7 @@ Returns:
 ### Promise.**getResultInt128**
 
 ```grain
-getResultInt128 : Int64 -> Option<Result<Int128.Int128, String>>
+getResultInt128 : Promise -> Option<Result<Int128.Int128, String>>
 ```
 
 If the current function is invoked by a callback we can access the execution results of the
@@ -452,7 +492,7 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`resultIdx`|`Int64`|The callback whose result to load|
+|`promise`|`Promise`|The promise whose result to load|
 
 Returns:
 
@@ -463,7 +503,7 @@ Returns:
 ### Promise.**getResultInt256**
 
 ```grain
-getResultInt256 : Int64 -> Option<Result<Int256.Int256, String>>
+getResultInt256 : Promise -> Option<Result<Int256.Int256, String>>
 ```
 
 If the current function is invoked by a callback we can access the execution results of the
@@ -477,11 +517,25 @@ Parameters:
 
 |param|type|description|
 |-----|----|-----------|
-|`resultIdx`|`Int64`|The callback whose result to load|
+|`promise`|`Promise`|The promise whose result to load|
 
 Returns:
 
 |type|description|
 |----|-----------|
 |`Option<Result<Int256.Int256, String>>`|`None` if the promise has not completed, or `Some(Ok(result))` if it has successfully, or `Some(Err(msg))` if it has failed|
+
+### Promise.**promiseReturn**
+
+```grain
+promiseReturn : Promise -> Void
+```
+
+When the given promise finishes executing its result is considered to be the result of the current function.
+
+Parameters:
+
+|param|type|description|
+|-----|----|-----------|
+|`promise`|`Promise`|The promise whose result to return|
 

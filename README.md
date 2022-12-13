@@ -5,7 +5,7 @@ This project provides bindings to the [NEAR](https://near.org) SDK in order to e
 ## Generating the Documentation
 
 ```bash
-$ find src -name '*.gr' | xargs -L 1 -I '{}' bash -c 'grain doc {} > $(echo {} | sed "s:src:docs/generated:g" | sed "s/\\.gr/.md/g")'
+$ grain doc src/ -o docs/generated/ --current-version=0.0.0
 ```
 
 # Building the Tests

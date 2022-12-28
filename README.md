@@ -5,7 +5,7 @@ This project provides bindings to the [NEAR](https://near.org) SDK in order to e
 ## Generating the Documentation
 
 ```bash
-$ grain doc src/ -o docs/generated/ --current-version=0.0.0
+$ grain doc src -o docs --current-version=0.0.0
 ```
 
 # Building the Tests

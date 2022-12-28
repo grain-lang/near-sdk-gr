@@ -18,7 +18,7 @@ View the individual pages for each SDK library:
 
 ## Prerequsites
 
-You'll need a v0.5.x version of the Grain compiler on your machine and general knowledge of the language. For more information about the language and how to install it, visit https://grain-lang.org.
+You'll need a v0.5.x version of the Grain compiler on your machine and general knowledge of the language. For more information about the language and how to install it, visit [grain-lang.org](https://grain-lang.org).
 
 ## Setting up your project
 

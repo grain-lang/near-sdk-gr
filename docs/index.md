@@ -95,8 +95,8 @@ This is the interface of our contract. Our contract has two methods to change th
 
 There are a number of flags we'll need to pass to the compiler.
 
-- `-I near-sdk-gr/src` to tell the compiler where the SDK is;
-- `--wasi-polyfill near-sdk-gr/src/near/wasi.gr` to stub out WASI functionality;
+- `-I near-sdk-gr` to tell the compiler where the SDK is;
+- `--wasi-polyfill near-sdk-gr/near/wasi.gr` to stub out WASI functionality;
 - `--no-bulk-memory` to disable bulk memory operations until NEAR supports them;
 - `--use-start-section` to ensure the NEAR blockchain loads all contract setup;
 - `--no-gc` to save on gas and storage fees;
@@ -106,7 +106,7 @@ There are a number of flags we'll need to pass to the compiler.
 All together, that's
 
 ```sh
-grain compile -I near-sdk-gr/src --wasi-polyfill near-sdk-gr/src/near/wasi.gr --no-bulk-memory --use-start-section --no-gc --elide-type-info --release index.gr
+grain compile -I near-sdk-gr --wasi-polyfill near-sdk-gr/near/wasi.gr --no-bulk-memory --use-start-section --no-gc --elide-type-info --release index.gr
 ```
 
 This can be made into a script to make compiling the contract easier.
@@ -117,4 +117,4 @@ Contracts can be tested before deploying them using `near-workspaces`. For an ex
 
 ## Configuring VSCode
 
-If you use VSCode to develop your contract, you can tell the language server where the NEAR SDK is by setting the `grain.cliFlags` setting to include `-I near-sdk-gr/src`.
+If you use VSCode to develop your contract, you can tell the language server where the NEAR SDK is by setting the `grain.cliFlags` setting to include `-I near-sdk-gr`.

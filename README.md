@@ -9,7 +9,7 @@ You can find information on how to use this SDK at https://grain-lang.github.io/
 ### Generating the Documentation
 
 ```bash
-$ grain doc src -o docs --current-version=0.0.0
+$ grain doc near -o docs/near --current-version=0.0.0
 ```
 
 ### Building the Tests

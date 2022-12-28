@@ -12,7 +12,7 @@ export let loadCounter = () => {
   // Check if key is in storage
   if (!(Storage.hasKey(key))) {
     // Initialize to zero.
-    ignore(setCounter(0l))
+    setCounter(0l)
   }
 
   Option.expect("key should be set", Storage.getInt32(key))

@@ -4,11 +4,11 @@ import Utils from "near/utils"
 import { setCounter, loadCounter } from "./counter"
 
 export let increment = () => {
-  ignore(setCounter(loadCounter() + 1l))
+  setCounter(loadCounter() + 1l)
 }
 
 export let decrement = () => {
-  ignore(setCounter(loadCounter() - 1l))
+  setCounter(loadCounter() - 1l)
 }
 
 export let getCounter = () => {

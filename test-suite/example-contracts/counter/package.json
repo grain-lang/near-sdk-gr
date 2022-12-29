@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "",
   "scripts": {
-    "build": "node script/grainfind.js compile src/index.gr",
+    "build": "grain compile -I ../../.. --wasi-polyfill ../../../wasi.gr --no-bulk-memory --use-start-section --no-gc --elide-type-info --release src/index.gr",
     "pretest": "npm run clean && npm run build",
     "test": "ava",
     "clean": "del-cli \"**/*.wasm\" \"**/*.wat\" \"**/*.modsig\""
@@ -14,7 +14,9 @@
     "del-cli": "^4.0.1"
   },
   "ava": {
-    "files": ["./tests/**.test.js"],
+    "files": [
+      "./tests/**.test.js"
+    ],
     "verbose": true,
     "timeout": "60s"
   }

@@ -1,0 +1,43 @@
+name: Grain NEAR SDK CI Workflow
+on: [push, pull_request]
+
+jobs:
+  build:
+    name: Test
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-latest]
+        node-version: ["16"]
+        grain-version: ["v0.5.10"]
+
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3.1.1
+        with:
+          node-version: ${{ matrix.node-version }}
+          check-latest: true
+          cache: "npm"
+
+      # Install specific version of npm
+      - name: Setup npm 8.4.0
+        run: |
+          npm install -g npm@8.4.0
+
+      - name: Install grain
+        run: |
+          sudo curl -L --output /usr/local/bin/grain https://github.com/grain-lang/grain/releases/download/grain-${{ matrix.grain-version }}/grain-linux-x64
+          sudo chmod +x /usr/local/bin/grain
+
+      - name: Install dependencies
+        run: |
+          npm ci && cd test-suite && npm ci && cd example-contracts && npm ci
+
+      - name: Run the tests
+        run: |
+          npm test

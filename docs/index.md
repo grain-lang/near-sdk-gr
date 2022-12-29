@@ -99,13 +99,12 @@ There are a number of flags we'll need to pass to the compiler.
 - `--no-bulk-memory` to disable bulk memory operations until NEAR supports them;
 - `--use-start-section` to ensure the NEAR blockchain loads all contract setup;
 - `--no-gc` to save on gas and storage fees;
-- `--elide-type-info` to save a bit more on storage fees;
 - `--release` to ensure we have the smallest and most efficient contract to deploy
 
 All together, that's
 
 ```sh
-grain compile -I near-sdk-gr --wasi-polyfill near-sdk-gr/wasi.gr --no-bulk-memory --use-start-section --no-gc --elide-type-info --release index.gr
+grain compile -I near-sdk-gr --wasi-polyfill near-sdk-gr/wasi.gr --no-bulk-memory --use-start-section --no-gc --release index.gr
 ```
 
 This can be made into a script to make compiling the contract easier.
@@ -116,4 +115,4 @@ Contracts can be tested before deploying them using `near-workspaces`. For an ex
 
 ## Configuring VSCode
 
-If you use VSCode to develop your contract, you can tell the language server where the NEAR SDK is by setting the `grain.cliFlags` setting for your workspace to include `-I near-sdk-gr`. To prevent recompilation of all of the wasm modules in the tree, configure the full set of flags, `-I near-sdk-gr --wasi-polyfill near-sdk-gr/wasi.gr --no-bulk-memory --use-start-section --no-gc --elide-type-info --release`.
+If you use VSCode to develop your contract, you can tell the language server where the NEAR SDK is by setting the `grain.cliFlags` setting for your workspace to include `-I near-sdk-gr`. To prevent recompilation of all of the wasm modules in the tree, configure the full set of flags, `-I near-sdk-gr --wasi-polyfill near-sdk-gr/wasi.gr --no-bulk-memory --use-start-section --no-gc --release`.

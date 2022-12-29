@@ -31,7 +31,7 @@ const NEAR_ARGS = [
   "--release",
   "--no-gc",
   "--wasi-polyfill",
-  "../../near/wasi.gr",
+  "../../wasi.gr",
   "-I",
   "../..",
   "--use-start-section",

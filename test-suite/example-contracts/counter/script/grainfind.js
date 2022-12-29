@@ -30,7 +30,7 @@ const grain = findGrain();
 const NEAR_ARGS = [
   "--release",
   "--wasi-polyfill",
-  "../../../near/wasi.gr",
+  "../../../wasi.gr",
   "-I",
   "../../..",
   "--use-start-section",

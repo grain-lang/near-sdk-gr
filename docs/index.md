@@ -14,7 +14,6 @@ View the individual pages for each SDK library:
 - [Storage](./near/storage)
 - [Utils](./near/utils)
 - [Validator](./near/validator)
-- [Wasi](./near/wasi)
 
 ## Prerequsites
 
@@ -96,7 +95,7 @@ This is the interface of our contract. Our contract has two methods to change th
 There are a number of flags we'll need to pass to the compiler.
 
 - `-I near-sdk-gr` to tell the compiler where the SDK is;
-- `--wasi-polyfill near-sdk-gr/near/wasi.gr` to stub out WASI functionality;
+- `--wasi-polyfill near-sdk-gr/wasi.gr` to stub out WASI functionality;
 - `--no-bulk-memory` to disable bulk memory operations until NEAR supports them;
 - `--use-start-section` to ensure the NEAR blockchain loads all contract setup;
 - `--no-gc` to save on gas and storage fees;
@@ -106,7 +105,7 @@ There are a number of flags we'll need to pass to the compiler.
 All together, that's
 
 ```sh
-grain compile -I near-sdk-gr --wasi-polyfill near-sdk-gr/near/wasi.gr --no-bulk-memory --use-start-section --no-gc --elide-type-info --release index.gr
+grain compile -I near-sdk-gr --wasi-polyfill near-sdk-gr/wasi.gr --no-bulk-memory --use-start-section --no-gc --elide-type-info --release index.gr
 ```
 
 This can be made into a script to make compiling the contract easier.

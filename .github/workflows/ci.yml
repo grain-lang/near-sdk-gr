@@ -11,7 +11,7 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         node-version: ["16"]
-        grain-version: ["v0.5.10"]
+        grain-version: ["v0.5.11"]
 
     steps:
       - name: Checkout project

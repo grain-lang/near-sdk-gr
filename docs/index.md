@@ -116,4 +116,4 @@ Contracts can be tested before deploying them using `near-workspaces`. For an ex
 
 ## Configuring VSCode
 
-If you use VSCode to develop your contract, you can tell the language server where the NEAR SDK is by setting the `grain.cliFlags` setting to include `-I near-sdk-gr`.
+If you use VSCode to develop your contract, you can tell the language server where the NEAR SDK is by setting the `grain.cliFlags` setting for your workspace to include `-I near-sdk-gr`. To prevent recompilation of all of the wasm modules in the tree, configure the full set of flags, `-I near-sdk-gr --wasi-polyfill near-sdk-gr/wasi.gr --no-bulk-memory --use-start-section --no-gc --elide-type-info --release`.

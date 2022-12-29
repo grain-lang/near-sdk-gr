@@ -1,0 +1,3 @@
+{
+    "grain.cliFlags": "-I ../.. --wasi-polyfill ../../wasi.gr --no-bulk-memory --use-start-section --no-gc --release"
+}

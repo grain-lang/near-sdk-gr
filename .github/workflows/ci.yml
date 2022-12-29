@@ -29,10 +29,11 @@ jobs:
         run: |
           npm install -g npm@8.4.0
 
-      - name: Install grain
-        run: |
-          sudo curl -L --output /usr/local/bin/grain https://github.com/grain-lang/grain/releases/download/grain-${{ matrix.grain-version }}/grain-linux-x64
-          sudo chmod +x /usr/local/bin/grain
+      - name: Install Grain
+        uses: engineerd/configurator@v0.0.8
+        with:
+          name: grain
+          url: https://github.com/grain-lang/grain/releases/download/grain-${{ matrix.grain-version }}/grain-linux-x64
 
       - name: Install dependencies
         run: |

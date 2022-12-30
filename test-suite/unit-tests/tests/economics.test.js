@@ -39,5 +39,6 @@ test("prepaidGas", async t => {
 test("usedGas", async t => {
   const {root, contract} = t.context.accounts
   const res = await root.call(contract, "doUsedGas", {})
-  t.deepEqual(res, 274446183237);
+  t.true(res > 270000000000);
+  t.true(res < 280000000000);
 })
